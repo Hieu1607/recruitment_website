@@ -1,0 +1,31 @@
+/**
+ * Backend Entry Point
+ * Initializes Express server, connects to database, and sets up middleware and routes
+ */
+
+const express = require('express');
+const cors = require('cors');
+const routes = require('./routes');
+const errorHandler = require('./middlewares/errorHandler');
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes
+app.use('/api/v1', routes);
+
+// Error handling middleware (must be last)
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
+module.exports = app;
+

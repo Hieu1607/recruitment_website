@@ -1,47 +1,78 @@
-# ================== NODEJS / EXPRESS / REACT ==================
+# Dependencies
 node_modules/
-dist/
-build/
-coverage/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
+lerna-debug.log*
 
-# ================== ENV FILE ==================
-.env
-
-# ================== REACT CACHE ==================
-.cache/
-.parcel-cache/
-
-# ================== DOCKER ==================
-docker-data/
-.docker/
-Dockerfile.dev
-docker-compose.override.yml
-
-# ================== POSTGRES ==================
-postgres-data/
-pgdata/
-*.sql
-*.dump
-*.backup
-
-# ================== LOG FILE ==================
-logs/
-*.log
-
-# ================== OS FILE ==================
-.DS_Store
-Thumbs.db
-
-# ================== IDE / EDITOR ==================
+# IDE and editor
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
 
-# ================== TEMP FILE ==================
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Testing
+.mocha/
+test-results/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Temporary files
 tmp/
 temp/
+*.tmp
+
+# Database files (if using local SQLite or similar)
+*.db
+*.sqlite
+*.sqlite3
+
+# Vite specific
+.vite/
+
+# Backend specific
+backend/node_modules/
+backend/.env*
+
+# Frontend specific
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# API keys and secrets
+.apikey
+secrets.json
