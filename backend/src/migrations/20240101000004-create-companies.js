@@ -10,7 +10,7 @@ module.exports = {
             },
             user_id: {
                 type: Sequelize.INTEGER,
-                allowNull: false,
+                allowNull: true,
                 references: {
                     model: 'users',
                     key: 'id',
@@ -41,6 +41,24 @@ module.exports = {
             website: {
                 type: Sequelize.STRING,
                 allowNull: true,
+            },
+            phone: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
+            email: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
+            createdAt: {
+                type: Sequelize.DATE,
+                allowNull: false,
+                defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+            },
+            updatedAt: {
+                type: Sequelize.DATE,
+                allowNull: false,
+                defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
             },
         });
     },
