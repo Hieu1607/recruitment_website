@@ -48,6 +48,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
+            cv_url: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
         },
         {
             tableName: 'user_profiles',

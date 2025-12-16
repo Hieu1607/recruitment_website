@@ -3,12 +3,18 @@
  * Standardized API response helpers
  */
 
-const successResponse = (res, statusCode, data, message) => {
-    return res.status(statusCode).json({
+const successResponse = (res, statusCode, data, message, pagination) => {
+    const response = {
         success: true,
         message: message || 'Success',
         data,
-    });
+    };
+    
+    if (pagination) {
+        response.pagination = pagination;
+    }
+    
+    return res.status(statusCode).json(response);
 };
 
 const errorResponse = (res, statusCode, message) => {

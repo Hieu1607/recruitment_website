@@ -47,7 +47,7 @@ services:
     networks:
       - recruitment_network
     restart: unless-stopped
-    command: sh -c "npm run migrate && npm run seed:all && npm start"
+    command: sh -c "npm start"
 
 volumes:
   postgres_data:

@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
                 },
             },
             status: {
-                type: DataTypes.STRING,
+                type: DataTypes.ENUM('applied', 'under_review', 'interview_scheduled', 'offered', 'rejected')   ,
                 allowNull: true,
             },
             created_at: {

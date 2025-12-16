@@ -12,7 +12,7 @@ const authService = require('../services/authService');
  */
 const register = async (req, res) => {
     try {
-        const { email, password, fullName } = req.body;
+        const { email, password, fullName, roleName } = req.body;
 
         // Validate input
         if (!email || !password) {
@@ -23,7 +23,7 @@ const register = async (req, res) => {
         }
 
         // Register user
-        const user = await authService.registerUser(email, password, fullName);
+        const user = await authService.registerUser(email, password, fullName, roleName);
 
         res.status(201).json({
             success: true,

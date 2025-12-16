@@ -8,7 +8,7 @@ module.exports = {
                 primaryKey: true,
                 autoIncrement: true,
             },
-            companyId: {
+            company_id: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
@@ -17,7 +17,7 @@ module.exports = {
                 },
                 onUpdate: 'CASCADE',
                 onDelete: 'CASCADE',
-                field: 'companyId',
+                field: 'company_id',
             },
             title: {
                 type: Sequelize.STRING,
@@ -56,12 +56,12 @@ module.exports = {
                 allowNull: true,
                 defaultValue: 'active',
             },
-            createdAt: {
+            created_at: {
                 type: Sequelize.DATE,
                 allowNull: false,
                 defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
             },
-            updatedAt: {
+            updated_at: {
                 type: Sequelize.DATE,
                 allowNull: false,
                 defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),

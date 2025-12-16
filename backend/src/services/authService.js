@@ -40,7 +40,7 @@ const generateToken = (user) => {
 /**
  * Register a new user
  */
-const registerUser = async (email, password, fullName) => {
+const registerUser = async (email, password, fullName , roleName) => {
     // Check if email already exists
     const existingUser = await User.findOne({
         where: { email },
@@ -53,11 +53,16 @@ const registerUser = async (email, password, fullName) => {
     // Hash password
     const password_hash = await hashPassword(password);
 
-    // Get default role_id (assuming 1 = jobseeker, 2 = employer)
-    // You can adjust this based on your business logic
-    const defaultRole = await Role.findOne({ where: { name: 'jobseeker' } });
+    // Get role_id (1 = admin, 2 = employer, 3 = jobseeker)
+    if (!roleName) {
+        roleName = 'jobseeker'; // default role
+    }
+    const defaultRole = await Role.findOne({
+        where: { name: roleName },
+    });
+
     if (!defaultRole) {
-        throw new Error('Default role not found');
+        throw new Error('Role not found');
     }
 
     // Create user
@@ -68,7 +73,7 @@ const registerUser = async (email, password, fullName) => {
     });
 
     // Create user profile if fullName is provided
-    if (fullName) {
+    if (fullName && defaultRole.name === 'jobseeker') {
         await UserProfile.create({
             user_id: user.id,
             full_name: fullName,

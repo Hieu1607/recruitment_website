@@ -47,6 +47,11 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.TEXT,
                 allowNull: true,
             },
+            status: {
+                type: DataTypes.STRING,
+                allowNull: true,
+                defaultValue: 'active',
+            },
             created_at: {
                 type: DataTypes.DATE,
                 allowNull: false,

@@ -51,6 +51,10 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: true,
             },
+            cv_url: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
         });
     },
 
