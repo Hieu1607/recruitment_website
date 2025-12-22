@@ -1,11 +1,8 @@
-/**
- * Custom Hook: useAuth
- * Custom hook for accessing authentication context
- */
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
-import { useAuth as useAuthContext } from '../context/AuthContext';
-
-export const useAuth = () => {
-    return useAuthContext();
+const useAuth = () => {
+  return useContext(AuthContext);
 };
 
+export default useAuth;

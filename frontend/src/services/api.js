@@ -1,13 +1,25 @@
-/**
- * API Service
- * Centralized API configuration and base functions for making HTTP requests to the backend
- */
+import axios from 'axios';
 
-// Base API URL configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Vite dùng import.meta.env chứ không dùng process.env
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// Example API service functions
-export const api = {
-    // Add your API functions here
-};
+const api = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
 
+// Tự động gắn token vào header nếu có
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+export default api;
