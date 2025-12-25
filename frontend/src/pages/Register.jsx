@@ -1,72 +1,52 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import authService from '../services/authService'; 
-import '../css/Login.css'; // Đảm bảo bạn import đúng file CSS
+import { useNavigate } from 'react-router-dom'; // Bổ sung để điều hướng linh hoạt
+import authService from '../services/authService';
+import '../css/Login.css';
 
-const Register = () => {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
+const Register = ({ goLogin }) => {
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // 1. Validate password
-    if (formData.password !== formData.confirmPassword) {
-      return setError('Mật khẩu xác nhận không khớp!');
+    // Validation cơ bản tại client
+    if (password !== confirmPassword) {
+      return setError('Mật khẩu xác nhận không khớp');
     }
-    if (formData.password.length < 6) {
-        return setError('Mật khẩu phải có ít nhất 6 ký tự.');
+
+    if (password.length < 6) {
+      return setError('Mật khẩu phải có ít nhất 6 ký tự');
     }
 
     setLoading(true);
     try {
-      // 2. CHUẨN BỊ DỮ LIỆU (Đã sửa lại dòng này)
-      // Backend của bạn code là: const { fullName } = req.body;
-      // Nên ở đây BẮT BUỘC phải gửi key là 'fullName' (không dùng full_name)
-      const payload = {
-        fullName: formData.fullName,  // <--- ĐÃ SỬA: full_name -> fullName
-        email: formData.email,
-        password: formData.password
-        // roleName: 'Candidate' (Nếu backend cần role thì bỏ comment dòng này)
-      };
+      await authService.register({
+        fullName,
+        email,
+        password
+      });
 
-      console.log("Dữ liệu gửi đi:", payload); // Log ra để kiểm tra
-
-      // 3. Gọi API
-      await authService.register(payload);
+      alert('Đăng ký thành công! Vui lòng đăng nhập.');
       
-      // 4. Thành công
-      if(window.confirm('Đăng ký thành công! Bạn có muốn đăng nhập ngay không?')) {
-          navigate('/login');
+      // Ưu tiên goLogin từ props, nếu không có thì dùng navigate
+      if (goLogin) {
+        goLogin();
       } else {
-          navigate('/login');
+        navigate('/login');
       }
-      
     } catch (err) {
-      console.error("Lỗi đăng ký:", err);
-      // Hiển thị thông báo lỗi chi tiết từ Backend trả về
-      if (err.response && err.response.data && err.response.data.error) {
-        setError(err.response.data.error); 
-      } else if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
+      if (err.response?.status === 409) {
+        setError('Email đã được đăng ký trên hệ thống');
       } else {
-        setError('Đăng ký thất bại. Vui lòng kiểm tra kết nối.');
+        setError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
       }
     } finally {
       setLoading(false);
@@ -76,73 +56,74 @@ const Register = () => {
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
-        {/* Phần Hình Ảnh */}
-        <div className="auth-banner" style={{backgroundImage: "url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')"}}>
+        {/* BÊN TRÁI: BANNER */}
+        <div
+          className="auth-banner"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')"
+          }}
+        >
           <div className="banner-text">
             <h2>Khởi đầu sự nghiệp</h2>
-            <p>Tạo hồ sơ ngay hôm nay để nhà tuyển dụng tìm thấy bạn.</p>
+            <p>Tạo tài khoản để nhà tuyển dụng tìm thấy bạn</p>
           </div>
         </div>
 
-        {/* Phần Form */}
+        {/* BÊN PHẢI: FORM */}
         <div className="auth-form-container">
           <div className="auth-header">
-            <h2>Tạo tài khoản</h2>
+            <h2>Đăng ký</h2>
             <p>Hoàn toàn miễn phí cho ứng viên</p>
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message" style={{ color: '#ef4444', marginBottom: '15px', fontSize: '14px' }}>{error}</div>}
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Họ và tên</label>
-              <input 
-                name="fullName"
-                type="text" 
+              <input
+                type="text"
                 className="form-input"
                 placeholder="Nguyễn Văn A"
-                value={formData.fullName} 
-                onChange={handleChange} 
-                required 
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
               />
             </div>
 
             <div className="form-group">
               <label>Email</label>
-              <input 
-                name="email"
-                type="email" 
+              <input
+                type="email"
                 className="form-input"
                 placeholder="email@example.com"
-                value={formData.email} 
-                onChange={handleChange} 
-                required 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
 
             <div className="form-group">
               <label>Mật khẩu</label>
-              <input 
-                name="password"
-                type="password" 
+              <input
+                type="password"
                 className="form-input"
                 placeholder="******"
-                value={formData.password} 
-                onChange={handleChange} 
-                required 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
 
             <div className="form-group">
               <label>Xác nhận mật khẩu</label>
-              <input 
-                name="confirmPassword"
-                type="password" 
+              <input
+                type="password"
                 className="form-input"
                 placeholder="******"
-                value={formData.confirmPassword} 
-                onChange={handleChange} 
-                required 
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
               />
             </div>
 
@@ -152,8 +133,14 @@ const Register = () => {
           </form>
 
           <div className="auth-footer">
-            Đã có tài khoản? 
-            <Link to="/login" className="auth-link">Đăng nhập</Link>
+            Đã có tài khoản?
+            <span
+              className="auth-link"
+              style={{ cursor: 'pointer', color: '#2563eb', marginLeft: '5px' }}
+              onClick={goLogin || (() => navigate('/login'))}
+            >
+              Đăng nhập
+            </span>
           </div>
         </div>
       </div>

@@ -1,29 +1,26 @@
 import api from './api';
 
+// Đường dẫn này nối vào http://localhost:5000/api thành http://localhost:5000/api/v1/public
+const AUTH_URL = '/v1/public';
+
+const login = async (email, password) => {
+    // Gọi POST tới /api/v1/public/login
+    const res = await api.post(`${AUTH_URL}/login`, { email, password });
+    if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+    }
+    return res.data;
+};
+
+const register = async (userData) => {
+    // Gọi POST tới /api/v1/public/register
+    const res = await api.post(`${AUTH_URL}/register`, userData);
+    return res.data;
+};
+
 const authService = {
-  // 1. Đăng nhập
-  login: async (credentials) => {
-    const response = await api.post('/v1/public/login', credentials);
-    return response.data; 
-  },
-
-  // 2. Đăng ký
-  register: async (userData) => {
-    const response = await api.post('/v1/public/register', userData);
-    return response.data;
-  },
-
-  // 3. Lấy thông tin User (Cái này giữ nguyên vì nó nằm ở userProfileRoutes)
-  getCurrentUser: async () => {
-    // Dựa theo index.js dòng: router.use('/profiles', userProfileRoutes);
-    // Thì đường dẫn này đúng là: /v1/profiles/me
-    const response = await api.get('/v1/profiles/me'); 
-    return response.data;
-  },
-
-  logout: () => {
-    localStorage.removeItem('token');
-  }
+    login,
+    register
 };
 
 export default authService;

@@ -1,73 +1,43 @@
-/**
- * Authentication Context
- * Quản lý toàn bộ trạng thái đăng nhập, đăng xuất và thông tin user
- */
-
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import authService from '../services/authService'; 
+import { createContext, useContext, useState } from 'react';
+import authService from '../services/authService';
 
 const AuthContext = createContext();
 
-// Hook custom 
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
-};
-
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true); 
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem('user'))
+  );
 
-    
-    useEffect(() => {
-        const initAuth = async () => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                try {
-                    const userData = await authService.getCurrentUser();
-                    setUser(userData);
-                } catch (error) {
-                    console.error("Phiên đăng nhập hết hạn:", error);
-                    localStorage.removeItem('token'); // Xóa token rác nếu lỗi
-                }
-            }
-            setLoading(false);
-        };
+  const login = async (email, password) => {
+    console.log('AuthContext: gọi login');
 
-        initAuth();
-    }, []);
+    const res = await authService.login(email, password);
 
-    // 2. Hàm Đăng nhập
-    const login = async (email, password) => {
-        const data = await authService.login({ email, password });
-        if (data.token) {
-            localStorage.setItem('token', data.token);
-            setUser(data.user); 
-            return true;
-        }
-        return false;
-    };
+    console.log('Login response:', res.data);
 
-    // 3. Hàm Đăng xuất
-    const logout = () => {
-        authService.logout(); 
-        setUser(null);
-    };
+    localStorage.setItem('token', res.data.token);
+    localStorage.setItem('user', JSON.stringify(res.data.user));
 
-    const value = {
+    setUser(res.data.user);
+  };
+
+  const logout = () => {
+    localStorage.clear();
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
         user,
-        login,
-        logout,
         isAuthenticated: !!user,
-    };
-
-    return (
-        <AuthContext.Provider value={value}>
-            {/* Chỉ render giao diện khi đã check xong token để tránh lỗi chuyển trang */}
-            {!loading && children}
-        </AuthContext.Provider>
-    );
+        login,
+        logout
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
+
+export const useAuth = () => useContext(AuthContext);

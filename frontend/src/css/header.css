@@ -1,0 +1,94 @@
+/* Header.css */
+.header-container {
+    display: flex;
+    justify-content: space-between; /* Đẩy Logo sang trái, Nút sang phải */
+    align-items: center;
+    padding: 0 40px; /* Khoảng cách lề 2 bên */
+    height: 70px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Bóng mờ nhẹ dưới header */
+    position: sticky; /* Giữ header dính trên cùng khi cuộn */
+    top: 0;
+    z-index: 1000;
+}
+
+/* Phần bên trái: Logo + Menu */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 800;
+    color: #00b14f; /* Màu xanh TopCV */
+    cursor: pointer;
+    letter-spacing: -1px;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-item {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+}
+
+.nav-item:hover {
+    color: #00b14f;
+}
+
+/* Phần bên phải: Các nút bấm */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Style chung cho các nút */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* Nút Đăng ký (Viền xanh, nền trắng) */
+.btn-register {
+    background-color: white;
+    border: 1px solid #00b14f;
+    color: #00b14f;
+}
+
+.btn-register:hover {
+    background-color: #f0fdf4;
+}
+
+/* Nút Đăng nhập (Nền xanh, chữ trắng) */
+.btn-login {
+    background-color: #00b14f;
+    border: 1px solid #00b14f;
+    color: white;
+}
+
+.btn-login:hover {
+    background-color: #009643;
+}
+
+/* Nút Nhà tuyển dụng (Màu xám đen - giống trong ảnh) */
+.btn-employer {
+    background-color: #212f3f;
+    border: 1px solid #212f3f;
+    color: white;
+}
+
+.btn-employer:hover {
+    opacity: 0.9;
+}

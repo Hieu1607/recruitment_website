@@ -1,33 +1,30 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link để chuyển trang
-import '../css/Login.css'; // Đảm bảo bạn đã có file CSS này
+import { useNavigate } from 'react-router-dom'; 
+import { useAuth } from '../context/AuthContext'; 
+import '../css/Login.css';
 
-const Login = () => {
+const Login = ({ goRegister }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  const { login } = useAuth();
-  const navigate = useNavigate();
+
+  const navigate = useNavigate(); 
+  const { login } = useAuth();   
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     try {
       // Gọi hàm login từ AuthContext
       await login(email, password);
-      navigate('/'); // Đăng nhập xong chuyển về trang chủ
+      // Điều hướng sau khi đăng nhập thành công
+      navigate('/'); 
     } catch (err) {
-      // Xử lý lỗi hiển thị ra màn hình
-      if (err.response && err.response.data && err.response.data.message) {
-         setError(err.response.data.message);
-      } else {
-         setError('Email hoặc mật khẩu không đúng!');
-      }
+      // Hiển thị lỗi cụ thể từ server hoặc lỗi mặc định
+      setError(err.response?.data?.message || 'Sai email hoặc mật khẩu');
     } finally {
       setLoading(false);
     }
@@ -36,55 +33,62 @@ const Login = () => {
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
-        {/* Phần Hình Ảnh */}
+        {/* BÊN TRÁI: BANNER */}
         <div className="auth-banner">
           <div className="banner-text">
-            <h2>Chào mừng trở lại!</h2>
-            <p>Kết nối với hàng ngàn cơ hội việc làm hấp dẫn.</p>
+            <h2>Chào mừng trở lại</h2>
+            <p>Đăng nhập để tiếp tục hành trình sự nghiệp của bạn</p>
           </div>
         </div>
 
-        {/* Phần Form */}
+        {/* BÊN PHẢI: FORM */}
         <div className="auth-form-container">
           <div className="auth-header">
-            <h2>Đăng Nhập</h2>
-            <p>Vui lòng nhập thông tin tài khoản của bạn</p>
+            <h2>Đăng nhập</h2>
+            <p>Vui lòng nhập thông tin tài khoản</p>
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message" style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Email</label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 className="form-input"
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
+                placeholder="email@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
 
             <div className="form-group">
               <label>Mật khẩu</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 className="form-input"
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+                placeholder="******"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
 
             <button type="submit" className="auth-btn" disabled={loading}>
-              {loading ? 'Đang xử lý...' : 'Đăng nhập'}
+              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
           </form>
 
-          {/* 👇 NÚT CHUYỂN SANG TRANG ĐĂNG KÝ Ở ĐÂY 👇 */}
           <div className="auth-footer">
             Chưa có tài khoản? 
-            <Link to="/register" className="auth-link">Tạo tài khoản mới</Link>
+            <span
+              className="auth-link"
+              style={{ cursor: 'pointer', color: '#2563eb', marginLeft: '5px' }}
+              onClick={goRegister || (() => navigate('/register'))} // Backup nếu không có prop goRegister
+            >
+              Đăng ký
+            </span>
           </div>
         </div>
       </div>

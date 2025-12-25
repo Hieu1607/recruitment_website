@@ -28,7 +28,7 @@ docker compose exec backend npx sequelize-cli db:seed:all
 
 ## Verify
 - Backend logs: `docker compose logs backend --tail=100`
-- API port: `http://localhost:5000`
+- API port: `   `
 
 ## Stop
 ```bash
