@@ -1,23 +1,22 @@
 // src/components/Header.jsx
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Import hook điều hướng
+import { useNavigate } from 'react-router-dom'; 
 import '../css/header.css';
 
 const Header = ({ isAuthenticated, user, logout }) => {
   const navigate = useNavigate();
 
-  // Hàm xử lý khi bấm nút
   const handleLogin = () => navigate('/login');
   const handleRegister = () => navigate('/register');
   const handleLogout = () => {
     logout();
-    navigate('/login'); // Hoặc navigate('/') tùy bạn
+    navigate('/'); 
   };
 
   return (
     <header className="header-container">
       <div className="header-left">
-        <div className="logo" onClick={() => navigate('/')}>Job Mart</div>
+        <div className="logo" onClick={() => navigate('/')}>JobCV</div>
         <nav className="nav-menu">
           <span className="nav-item">Việc làm</span>
           <span className="nav-item">Hồ sơ & CV</span>

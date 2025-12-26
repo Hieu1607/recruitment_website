@@ -1,0 +1,179 @@
+.filter-sidebar {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 280px; /* Độ rộng cố định sidebar */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    font-family: 'Inter', sans-serif;
+}
+
+.filter-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.filter-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #00b14f; /* Màu xanh TopCV */
+    font-weight: 700;
+}
+
+.filter-group {
+    margin-bottom: 24px;
+}
+
+.group-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.group-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Scroll cho list quá dài */
+.group-content.scrollable {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+/* Scrollbar đẹp */
+.group-content.scrollable::-webkit-scrollbar {
+    width: 4px;
+}
+.group-content.scrollable::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+/* --- CUSTOM CHECKBOX (VUÔNG) --- */
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #555;
+    position: relative;
+    padding-left: 28px;
+}
+
+.checkbox-item input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 18px;
+    width: 18px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Khi hover */
+.checkbox-item:hover input ~ .checkmark {
+    border-color: #00b14f;
+}
+
+/* Khi checked */
+.checkbox-item input:checked ~ .checkmark {
+    background-color: #00b14f;
+    border-color: #00b14f;
+}
+
+/* Dấu tích bên trong */
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-item input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-item .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.count {
+    color: #999;
+    font-size: 12px;
+}
+
+/* --- CUSTOM RADIO (TRÒN) --- */
+.radio-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #555;
+    position: relative;
+    padding-left: 28px;
+}
+
+.radio-item input {
+    position: absolute;
+    opacity: 0;
+}
+
+.radio-mark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 18px;
+    width: 18px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+}
+
+.radio-item input:checked ~ .radio-mark {
+    border-color: #00b14f;
+}
+
+.radio-mark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.radio-item input:checked ~ .radio-mark:after {
+    display: block;
+}
+
+.radio-item .radio-mark:after {
+    top: 4px;
+    left: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00b14f;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+}
