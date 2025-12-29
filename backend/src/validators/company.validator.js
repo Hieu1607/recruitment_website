@@ -106,6 +106,7 @@ const updateCompanyValidation = [
       return true;
     }),
 ];
+];
 
 /**
  * Validation rules for getting a company by ID

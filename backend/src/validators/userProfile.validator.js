@@ -11,8 +11,6 @@ const updateProfileValidation = [
   body('skills').optional().trim().isLength({ max: 5000 }).withMessage('skills too long'),
   body('experience').optional().trim().isLength({ max: 5000 }).withMessage('experience too long'),
   body('education').optional().trim().isLength({ max: 5000 }).withMessage('education too long'),
-  body('avatar_url').optional().trim().isURL().withMessage('avatar_url must be a valid URL'),
-  body('cv_url').optional().trim().isURL().withMessage('cv_url must be a valid URL'),
 ];
 
 const getProfileByUserIdValidation = [

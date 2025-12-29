@@ -6,14 +6,16 @@
 const { Company } = require('../models');
 const { NotFoundError, ForbiddenError, BadRequestError } = require('../utils/errors');
 const { Op } = require('sequelize');
+const minioService = require('./minio.service');
 
 /**
  * Create a new company
  * @param {Object} companyData - Company data
  * @param {number} userId - ID of the user creating the company
+ * @param {Object} logoFile - Logo file from multer (optional)
  * @returns {Promise<Object>} Created company
  */
-const createCompany = async (companyData, userId) => {
+const createCompany = async (companyData, userId, logoFile = null) => {
   // Check if user already has a company
   const existingCompany = await Company.findOne({ where: { user_id: userId } });
   
@@ -21,11 +23,40 @@ const createCompany = async (companyData, userId) => {
     throw new BadRequestError('User already has a company registered');
   }
 
+  let logoUrl = null;
+  
+  // Upload logo to MinIO if file provided
+  if (logoFile) {
+    try {
+      logoUrl = await minioService.uploadCompanyLogo(logoFile, `temp_${Date.now()}`);
+    } catch (error) {
+      throw new BadRequestError(`Failed to upload logo: ${error.message}`);
+    }
+  }
+
   // Create company with user_id
   const company = await Company.create({
     ...companyData,
+    logo_company_url: logoUrl,
     user_id: userId
   });
+
+  // Update logo URL with actual company ID if logo was uploaded
+  if (logoUrl && company.id) {
+    try {
+      const newLogoUrl = await minioService.uploadCompanyLogo(logoFile, company.id);
+      await company.update({ logo_company_url: newLogoUrl });
+      
+      // Clean up temporary logo
+      try {
+        await minioService.deleteFileByUrl(logoUrl);
+      } catch (cleanupError) {
+        console.warn('Failed to cleanup temporary logo:', cleanupError.message);
+      }
+    } catch (error) {
+      console.error('Failed to update logo with company ID:', error.message);
+    }
+  }
 
   return company;
 };
@@ -128,9 +159,10 @@ const getCompanyByUserId = async (userId) => {
  * @param {number} companyId - Company ID
  * @param {Object} updateData - Data to update
  * @param {number} userId - ID of the user performing the update
+ * @param {Object} logoFile - Logo file from multer (optional)
  * @returns {Promise<Object>} Updated company
  */
-const updateCompany = async (companyId, updateData, userId) => {
+const updateCompany = async (companyId, updateData, userId, logoFile = null) => {
   const company = await Company.findByPk(companyId);
 
   if (!company) {
@@ -142,11 +174,35 @@ const updateCompany = async (companyId, updateData, userId) => {
     throw new ForbiddenError('You do not have permission to update this company');
   }
 
+  let logoUrl = company.logo_company_url; // Keep existing logo by default
+  
+  // Upload new logo to MinIO if file provided
+  if (logoFile) {
+    try {
+      const oldLogoUrl = company.logo_company_url;
+      logoUrl = await minioService.uploadCompanyLogo(logoFile, companyId);
+      
+      // Delete old logo if it exists
+      if (oldLogoUrl) {
+        try {
+          await minioService.deleteFileByUrl(oldLogoUrl);
+        } catch (deleteError) {
+          console.warn('Failed to delete old logo:', deleteError.message);
+        }
+      }
+    } catch (error) {
+      throw new BadRequestError(`Failed to upload logo: ${error.message}`);
+    }
+  }
+
   // Remove user_id from update data to prevent changing ownership
   delete updateData.user_id;
 
-  // Update company
-  await company.update(updateData);
+  // Update company with new logo URL
+  await company.update({
+    ...updateData,
+    logo_company_url: logoUrl
+  });
 
   return company;
 };
@@ -167,6 +223,15 @@ const deleteCompany = async (companyId, userId) => {
   // Check if user owns this company
   if (company.user_id !== userId) {
     throw new ForbiddenError('You do not have permission to delete this company');
+  }
+
+  // Delete company logo from MinIO if exists
+  if (company.logo_company_url) {
+    try {
+      await minioService.deleteFileByUrl(company.logo_company_url);
+    } catch (error) {
+      console.warn('Failed to delete company logo:', error.message);
+    }
   }
 
   // Delete company

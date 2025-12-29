@@ -8,6 +8,7 @@ const router = express.Router();
 const companyController = require('../controllers/company.controller');
 const companyValidator = require('../validators/company.validator');
 const { authenticate } = require('../middlewares/auth');
+const { uploadCompanyLogo, handleUploadErrors } = require('../middlewares/upload');
 
 // Public routes - accessible without authentication
 router.get('/', 
@@ -25,6 +26,8 @@ router.get('/:id',
 // Protected routes - require authentication
 router.post('/', 
     authenticate,
+    uploadCompanyLogo,
+    handleUploadErrors,
     companyValidator.createCompanyValidation,
     companyValidator.handleValidationErrors,
     companyController.createCompany
@@ -37,6 +40,8 @@ router.get('/my/company',
 
 router.put('/:id', 
     authenticate,
+    uploadCompanyLogo,
+    handleUploadErrors,
     companyValidator.updateCompanyValidation,
     companyValidator.handleValidationErrors,
     companyController.updateCompany
