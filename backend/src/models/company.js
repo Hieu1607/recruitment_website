@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             user_id: {
                 type: DataTypes.INTEGER,
-                allowNull: false,
+                allowNull: true,
                 references: {
                     model: 'users',
                     key: 'id',
@@ -36,6 +36,18 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: true,
             },
             website: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
+            phone: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
+            email: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
+            logo_company_url: {
                 type: DataTypes.STRING,
                 allowNull: true,
             },

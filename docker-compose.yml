@@ -36,10 +36,18 @@ services:
       DB_NAME: ${DB_NAME:-recruitment_db}
       NODE_ENV: ${NODE_ENV:-development}
       JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_key}
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: false
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin123
+      MINIO_BUCKET_NAME: recruitment-files
     ports:
       - "${PORT:-5000}:5000"
     depends_on:
       db:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     volumes:
       - ./backend:/app
@@ -49,8 +57,45 @@ services:
     restart: unless-stopped
     command: sh -c "npm start"
 
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - recruitment_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: alpine:latest
+    container_name: minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_BUCKET_NAME: recruitment-files
+    volumes:
+      - ./init-minio.sh:/init-minio.sh
+    networks:
+      - recruitment_network
+    command: sh -c "apk add --no-cache curl && chmod +x /init-minio.sh && /init-minio.sh"
+
 volumes:
   postgres_data:
+  minio_data:
 
 networks:
   recruitment_network:

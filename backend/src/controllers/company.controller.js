@@ -14,8 +14,9 @@ const createCompany = async (req, res, next) => {
   try {
     const userId = req.user.id; // From auth middleware
     const companyData = req.body;
+    const logoFile = req.file; // From multer middleware
 
-    const company = await companyService.createCompany(companyData, userId);
+    const company = await companyService.createCompany(companyData, userId, logoFile);
 
     return successResponse(
       res,
@@ -107,8 +108,9 @@ const updateCompany = async (req, res, next) => {
     const companyId = parseInt(req.params.id);
     const userId = req.user.id; // From auth middleware
     const updateData = req.body;
+    const logoFile = req.file; // From multer middleware
 
-    const company = await companyService.updateCompany(companyId, updateData, userId);
+    const company = await companyService.updateCompany(companyId, updateData, userId, logoFile);
 
     return successResponse(
       res,
