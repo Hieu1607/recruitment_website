@@ -49,8 +49,24 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: true,
             },
             cv_url: {
-                type: DataTypes.STRING,
+                type: DataTypes.TEXT,
                 allowNull: true,
+                get() {
+                    const rawValue = this.getDataValue('cv_url');
+                    if (!rawValue) return [];
+                    try {
+                        return JSON.parse(rawValue);
+                    } catch (e) {
+                        return [];
+                    }
+                },
+                set(value) {
+                    if (Array.isArray(value)) {
+                        this.setDataValue('cv_url', JSON.stringify(value));
+                    } else {
+                        this.setDataValue('cv_url', JSON.stringify([]));
+                    }
+                }
             },
         },
         {

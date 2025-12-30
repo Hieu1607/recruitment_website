@@ -97,7 +97,7 @@ const uploadCV = uploadSingle('cv');
 // Profile upload middleware (avatar + CV)
 const uploadProfile = uploadFields([
   { name: 'avatar', maxCount: 1 },
-  { name: 'cv', maxCount: 1 }
+  { name: 'cv', maxCount: 5 }
 ]);
 
 // Error handler middleware for multer errors
