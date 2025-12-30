@@ -46,6 +46,7 @@ curl -X GET "http://localhost:5000/api/companies?page=1&limit=10&search=tech&siz
       "type": "Technology",
       "address": "123 Tech Street, Silicon Valley, CA",
       "website": "https://techsolutions.com",
+      "logo_company_url": "https://techsolutions.com/logo.png",
       "createdAt": "2024-01-15T10:30:00.000Z",
       "updatedAt": "2024-01-15T10:30:00.000Z"
     },
@@ -57,6 +58,7 @@ curl -X GET "http://localhost:5000/api/companies?page=1&limit=10&search=tech&siz
       "type": "Technology",
       "address": "456 Innovation Ave, San Francisco, CA",
       "website": "https://innovationlabs.com",
+      "logo_company_url": "https://innovationlabs.com/assets/logo.jpg",
       "createdAt": "2024-01-16T14:20:00.000Z",
       "updatedAt": "2024-01-16T14:20:00.000Z"
     }
@@ -100,6 +102,7 @@ curl -X GET "http://localhost:5000/api/companies/1"
     "type": "Technology",
     "address": "123 Tech Street, Silicon Valley, CA 94025",
     "website": "https://techsolutions.com",
+    "logo_company_url": "https://techsolutions.com/logo.png",
     "createdAt": "2024-01-15T10:30:00.000Z",
     "updatedAt": "2024-01-15T10:30:00.000Z"
   }
@@ -124,42 +127,30 @@ Create a new company profile. Requires authentication. Each user can only create
 **Headers:**
 ```
 Authorization: Bearer <your_jwt_token>
-Content-Type: application/json
+Content-Type: multipart/form-data
 ```
 
-**Request Body:**
-```json
-{
-  "name": "Tech Solutions Inc",
-  "description": "Leading technology consulting firm specializing in cloud solutions",
-  "size": "51-200",
-  "type": "Technology",
-  "address": "123 Tech Street, Silicon Valley, CA 94025",
-  "website": "https://techsolutions.com"
-}
-```
-
-**Field Validations:**
-- `name` (required): 2-255 characters
-- `description` (optional): max 5000 characters
-- `size` (optional): Valid values: `1-10`, `11-50`, `51-200`, `201-500`, `501-1000`, `1001-5000`, `5000+`, or empty string
-- `type` (optional): max 100 characters
-- `address` (optional): max 500 characters
-- `website` (optional): Valid URL format
+**Request Body (form-data):**
+- `name` (text, required): Company name (2-255 characters)
+- `description` (text, optional): Company description (max 5000 characters)  
+- `size` (text, optional): Company size (`1-10`, `11-50`, `51-200`, `201-500`, `501-1000`, `1001-5000`, `5000+`)
+- `type` (text, optional): Company type (max 100 characters)
+- `address` (text, optional): Company address (max 500 characters)
+- `website` (text, optional): Company website URL
+- `logo_company_url` (file, optional): Company logo image file (JPEG, PNG, GIF, WebP, max 10MB)
 
 **Example Request:**
 ```bash
 curl -X POST "http://localhost:5000/api/companies" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Tech Solutions Inc",
-    "description": "Leading technology consulting firm",
-    "size": "51-200",
-    "type": "Technology",
-    "address": "123 Tech Street, Silicon Valley, CA 94025",
-    "website": "https://techsolutions.com"
-  }'
+  -F "name=Tech Solutions Inc" \
+  -F "description=Leading technology consulting firm" \
+  -F "size=51-200" \
+  -F "type=Technology" \
+  -F "address=123 Tech Street, Silicon Valley, CA 94025" \
+  -F "website=https://techsolutions.com" \
+  -F "logo_company_url=@/path/to/company_logo.png"
+```
 ```
 
 **Example Response (201 Created):**
@@ -175,6 +166,7 @@ curl -X POST "http://localhost:5000/api/companies" \
     "type": "Technology",
     "address": "123 Tech Street, Silicon Valley, CA 94025",
     "website": "https://techsolutions.com",
+    "logo_company_url": "http://localhost:9000/company-logos/company_15/1640261400000_logo.png",
     "user_id": 42,
     "createdAt": "2024-12-14T10:30:00.000Z",
     "updatedAt": "2024-12-14T10:30:00.000Z"
@@ -277,20 +269,17 @@ Update an existing company. Only the company owner can update their company.
 **Headers:**
 ```
 Authorization: Bearer <your_jwt_token>
-Content-Type: application/json
+Content-Type: multipart/form-data
 ```
 
-**Request Body (all fields optional):**
-```json
-{
-  "name": "Tech Solutions International",
-  "description": "Leading global technology consulting firm",
-  "size": "201-500",
-  "type": "Technology & Consulting",
-  "address": "456 Innovation Blvd, Silicon Valley, CA 94025",
-  "website": "https://techsolutions-intl.com"
-}
-```
+**Request Body (form-data, all fields optional):**
+- `name` (text): Company name (2-255 characters)
+- `description` (text): Company description (max 5000 characters)
+- `size` (text): Company size (`1-10`, `11-50`, `51-200`, `201-500`, `501-1000`, `1001-5000`, `5000+`)
+- `type` (text): Company type (max 100 characters)
+- `address` (text): Company address (max 500 characters) 
+- `website` (text): Company website URL
+- `logo_company_url` (file): New company logo image file (JPEG, PNG, GIF, WebP, max 10MB)
 
 **Field Validations:**
 - `name` (optional): 2-255 characters, cannot be empty if provided
@@ -302,14 +291,15 @@ Content-Type: application/json
 
 **Example Request:**
 ```bash
+**Example Request:**
+```bash
 curl -X PUT "http://localhost:5000/api/companies/15" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Tech Solutions International",
-    "size": "201-500",
-    "website": "https://techsolutions-intl.com"
-  }'
+  -F "name=Tech Solutions International" \
+  -F "size=201-500" \
+  -F "website=https://techsolutions-intl.com" \
+  -F "logo_company_url=@/path/to/new_company_logo.png"
+```
 ```
 
 **Example Response (200 OK):**
@@ -325,6 +315,7 @@ curl -X PUT "http://localhost:5000/api/companies/15" \
     "type": "Technology",
     "address": "123 Tech Street, Silicon Valley, CA 94025",
     "website": "https://techsolutions-intl.com",
+    "logo_company_url": "http://localhost:9000/company-logos/company_15/1640261400000_new_logo.png",
     "user_id": 42,
     "createdAt": "2024-12-14T10:30:00.000Z",
     "updatedAt": "2024-12-14T11:45:00.000Z"

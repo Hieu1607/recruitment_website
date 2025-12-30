@@ -54,43 +54,31 @@ Update the authenticated user's profile. Creates profile if not exists.
 **Headers:**
 ```
 Authorization: Bearer <token>
-Content-Type: application/json
+Content-Type: multipart/form-data
 ```
 
-**Request Body (all fields optional):**
-```json
-{
-  "full_name": "Nguyen Van B",
-  "phone": "0987654321",
-  "address": "456 Le Loi, HCM",
-  "dob": "1996-12-20",
-  "skills": "Python, Django, PostgreSQL",
-  "experience": "5 years backend development",
-  "education": "Master of IT, HUST",
-  "avatar_url": "https://example.com/avatar-new.jpg",
-  "cv_url": "https://example.com/cv-new.pdf"
-}
-```
-
-**Field Validations:**
-- `full_name`: max 255 characters
-- `phone`: max 20 characters
-- `address`: max 500 characters
-- `dob`: ISO date (YYYY-MM-DD)
-- `skills`, `experience`, `education`: max 5000 characters each
-- `avatar_url`, `cv_url`: must be valid URLs
+**Request Body (form-data, all fields optional):**
+- `full_name` (text): Full name (max 255 characters)
+- `phone` (text): Phone number (max 20 characters)
+- `address` (text): Address (max 500 characters)
+- `dob` (text): Date of birth in ISO format (YYYY-MM-DD)
+- `skills` (text): Skills description (max 5000 characters)
+- `experience` (text): Experience description (max 5000 characters)
+- `education` (text): Education description (max 5000 characters)
+- `avatar` (file): Avatar image file (JPEG, PNG, GIF, WebP, max 10MB)
+- `cv` (file): CV file (PDF, DOC, DOCX, max 10MB)
 
 **Example Request:**
 ```bash
 curl -X PUT "http://localhost:5000/api/v1/profiles/me" \
   -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "full_name": "Nguyen Van B",
-    "phone": "0987654321",
-    "skills": "Python, Django, PostgreSQL",
-    "experience": "5 years backend development"
-  }'
+  -F "full_name=Nguyen Van B" \
+  -F "phone=0987654321" \
+  -F "skills=Python, Django, PostgreSQL" \
+  -F "experience=5 years backend development" \
+  -F "avatar=@/path/to/avatar.jpg" \
+  -F "cv=@/path/to/cv.pdf"
+```
 ```
 
 **Example Response (200):**
@@ -108,8 +96,8 @@ curl -X PUT "http://localhost:5000/api/v1/profiles/me" \
     "skills": "Python, Django, PostgreSQL",
     "experience": "5 years backend development",
     "education": "Bachelor of Computer Science, VNU",
-    "avatar_url": "https://example.com/avatars/user10.jpg",
-    "cv_url": "https://example.com/cv/user10.pdf"
+    "avatar_url": "http://localhost:9000/avatars/user_10/1640261400000_avatar.jpg",
+    "cv_url": "http://localhost:9000/resumes/user_10/1640261400000_cv.pdf"
   }
 }
 ```
@@ -153,8 +141,8 @@ curl -X GET "http://localhost:5000/api/v1/profiles/10"
     "skills": "JavaScript, React, Node.js",
     "experience": "3 years as Frontend Developer",
     "education": "Bachelor of Computer Science, VNU",
-    "avatar_url": "https://example.com/avatars/user10.jpg",
-    "cv_url": "https://example.com/cv/user10.pdf"
+    "avatar_url": "http://localhost:9000/avatars/user_10/1640261400000_avatar.jpg",
+    "cv_url": "http://localhost:9000/resumes/user_10/1640261400000_cv.pdf"
   }
 }
 ```
@@ -177,6 +165,36 @@ curl -X GET "http://localhost:5000/api/v1/profiles/10"
 
 ---
 
+## DELETE /profiles/me (Protected)
+Delete the authenticated user's profile and associated files (avatar, CV).
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Example Request:**
+```bash
+curl -X DELETE "http://localhost:5000/api/v1/profiles/me" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Example Response (200):**
+```json
+{
+  "success": true,
+  "message": "Profile deleted successfully",
+  "data": null
+}
+```
+
+**Error (404 Not Found):**
+```json
+{ "success": false, "error": "Profile not found" }
+```
+
+---
+
 ## Common Use Cases
 
 ### 1. User completes their profile after registration
@@ -188,17 +206,16 @@ TOKEN="<your_token>"
 curl -X GET "http://localhost:5000/api/v1/profiles/me" \
   -H "Authorization: Bearer $TOKEN"
 
-# Update profile with details
+# Update profile with details and files
 curl -X PUT "http://localhost:5000/api/v1/profiles/me" \
   -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "full_name": "Tran Thi C",
-    "phone": "0911222333",
-    "dob": "1998-03-10",
-    "skills": "Java, Spring Boot, MySQL",
-    "education": "Bachelor IT, NEU"
-  }'
+  -F "full_name=Tran Thi C" \
+  -F "phone=0911222333" \
+  -F "dob=1998-03-10" \
+  -F "skills=Java, Spring Boot, MySQL" \
+  -F "education=Bachelor IT, NEU" \
+  -F "avatar=@/path/to/profile_photo.jpg" \
+  -F "cv=@/path/to/resume.pdf"
 ```
 
 ### 2. Employer views candidate profile

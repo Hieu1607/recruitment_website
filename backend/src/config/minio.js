@@ -84,8 +84,9 @@ async function uploadBuffer(bucketName, objectName, buffer, contentType) {
 // Get file URL
 function getFileUrl(bucketName, objectName) {
   const protocol = minioClient.useSSL ? 'https' : 'http';
+  const publicEndpoint = process.env.MINIO_PUBLIC_ENDPOINT || process.env.MINIO_ENDPOINT || 'localhost';
   const port = minioClient.port === 80 || minioClient.port === 443 ? '' : `:${minioClient.port}`;
-  return `${protocol}://${minioClient.endPoint}${port}/${bucketName}/${objectName}`;
+  return `${protocol}://${publicEndpoint}${port}/${bucketName}/${objectName}`;
 }
 
 // Delete file
