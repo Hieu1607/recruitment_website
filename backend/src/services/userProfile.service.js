@@ -22,7 +22,7 @@ const updateMyProfile = async (userId, updateData, files = {}) => {
   if (!profile) {
     // Create if not exists with files if provided
     let avatarUrl = null;
-    let cvUrl = null;
+    let cvUrls = [];
 
     // Upload avatar if provided
     if (files.avatar) {
@@ -33,12 +33,15 @@ const updateMyProfile = async (userId, updateData, files = {}) => {
       }
     }
 
-    // Upload CV if provided
-    if (files.cv) {
-      try {
-        cvUrl = await minioService.uploadCV(files.cv, userId);
-      } catch (error) {
-        throw new Error(`Failed to upload CV: ${error.message}`);
+    // Upload CVs if provided (can be multiple)
+    if (files.cv && Array.isArray(files.cv)) {
+      for (const cvFile of files.cv) {
+        try {
+          const cvUrl = await minioService.uploadCV(cvFile, userId);
+          cvUrls.push(cvUrl);
+        } catch (error) {
+          throw new Error(`Failed to upload CV: ${error.message}`);
+        }
       }
     }
 
@@ -46,7 +49,7 @@ const updateMyProfile = async (userId, updateData, files = {}) => {
       user_id: userId, 
       ...updateData,
       avatar_url: avatarUrl,
-      cv_url: cvUrl
+      cv_url: cvUrls
     });
   } else {
     // Update existing profile
@@ -54,7 +57,7 @@ const updateMyProfile = async (userId, updateData, files = {}) => {
     delete updateData.user_id;
 
     let avatarUrl = profile.avatar_url; // Keep existing by default
-    let cvUrl = profile.cv_url; // Keep existing by default
+    let cvUrls = Array.isArray(profile.cv_url) ? [...profile.cv_url] : []; // Keep existing CVs
 
     // Upload new avatar if provided
     if (files.avatar) {
@@ -75,29 +78,22 @@ const updateMyProfile = async (userId, updateData, files = {}) => {
       }
     }
 
-    // Upload new CV if provided
-    if (files.cv) {
-      try {
-        const oldCvUrl = profile.cv_url;
-        cvUrl = await minioService.uploadCV(files.cv, userId);
-        
-        // Delete old CV if exists
-        if (oldCvUrl) {
-          try {
-            await minioService.deleteFileByUrl(oldCvUrl);
-          } catch (deleteError) {
-            console.warn('Failed to delete old CV:', deleteError.message);
-          }
+    // Upload new CVs if provided (add to existing CVs)
+    if (files.cv && Array.isArray(files.cv)) {
+      for (const cvFile of files.cv) {
+        try {
+          const cvUrl = await minioService.uploadCV(cvFile, userId);
+          cvUrls.push(cvUrl);
+        } catch (error) {
+          throw new Error(`Failed to upload CV: ${error.message}`);
         }
-      } catch (error) {
-        throw new Error(`Failed to upload CV: ${error.message}`);
       }
     }
 
     await profile.update({
       ...updateData,
       avatar_url: avatarUrl,
-      cv_url: cvUrl
+      cv_url: cvUrls
     });
   }
   
@@ -126,12 +122,14 @@ const deleteMyProfile = async (userId) => {
     }
   }
 
-  // Delete CV from MinIO if exists
-  if (profile.cv_url) {
-    try {
-      await minioService.deleteFileByUrl(profile.cv_url);
-    } catch (error) {
-      console.warn('Failed to delete CV:', error.message);
+  // Delete all CVs from MinIO if exist
+  if (Array.isArray(profile.cv_url) && profile.cv_url.length > 0) {
+    for (const cvUrl of profile.cv_url) {
+      try {
+        await minioService.deleteFileByUrl(cvUrl);
+      } catch (error) {
+        console.warn('Failed to delete CV:', error.message);
+      }
     }
   }
 

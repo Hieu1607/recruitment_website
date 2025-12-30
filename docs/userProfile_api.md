@@ -36,7 +36,10 @@ curl -X GET "http://localhost:5000/api/v1/profiles/me" \
     "experience": "3 years as Frontend Developer at Company X",
     "education": "Bachelor of Computer Science, VNU",
     "avatar_url": "https://example.com/avatars/user10.jpg",
-    "cv_url": "https://example.com/cv/user10.pdf"
+    "cv_url": [
+      "https://example.com/cv/user10_cv1.pdf",
+      "https://example.com/cv/user10_cv2.pdf"
+    ]
   }
 }
 ```
@@ -66,9 +69,9 @@ Content-Type: multipart/form-data
 - `experience` (text): Experience description (max 5000 characters)
 - `education` (text): Education description (max 5000 characters)
 - `avatar` (file): Avatar image file (JPEG, PNG, GIF, WebP, max 10MB)
-- `cv` (file): CV file (PDF, DOC, DOCX, max 10MB)
+- `cv` (file): CV file(s) - Can upload up to 5 CV files (PDF, DOC, DOCX, max 10MB each). New CVs will be added to existing ones.
 
-**Example Request:**
+**Example Request (Single CV):**
 ```bash
 curl -X PUT "http://localhost:5000/api/v1/profiles/me" \
   -H "Authorization: Bearer <token>" \
@@ -78,6 +81,16 @@ curl -X PUT "http://localhost:5000/api/v1/profiles/me" \
   -F "experience=5 years backend development" \
   -F "avatar=@/path/to/avatar.jpg" \
   -F "cv=@/path/to/cv.pdf"
+```
+
+**Example Request (Multiple CVs):**
+```bash
+curl -X PUT "http://localhost:5000/api/v1/profiles/me" \
+  -H "Authorization: Bearer <token>" \
+  -F "full_name=Nguyen Van B" \
+  -F "cv=@/path/to/cv_english.pdf" \
+  -F "cv=@/path/to/cv_vietnamese.pdf" \
+  -F "cv=@/path/to/cv_detailed.pdf"
 ```
 ```
 
@@ -97,7 +110,11 @@ curl -X PUT "http://localhost:5000/api/v1/profiles/me" \
     "experience": "5 years backend development",
     "education": "Bachelor of Computer Science, VNU",
     "avatar_url": "http://localhost:9000/avatars/user_10/1640261400000_avatar.jpg",
-    "cv_url": "http://localhost:9000/resumes/user_10/1640261400000_cv.pdf"
+    "cv_url": [
+      "http://localhost:9000/resumes/user_10/1640261400000_cv_english.pdf",
+      "http://localhost:9000/resumes/user_10/1640261401000_cv_vietnamese.pdf",
+      "http://localhost:9000/resumes/user_10/1640261402000_cv_detailed.pdf"
+    ]
   }
 }
 ```
@@ -142,7 +159,9 @@ curl -X GET "http://localhost:5000/api/v1/profiles/10"
     "experience": "3 years as Frontend Developer",
     "education": "Bachelor of Computer Science, VNU",
     "avatar_url": "http://localhost:9000/avatars/user_10/1640261400000_avatar.jpg",
-    "cv_url": "http://localhost:9000/resumes/user_10/1640261400000_cv.pdf"
+    "cv_url": [
+      "http://localhost:9000/resumes/user_10/1640261400000_cv.pdf"
+    ]
   }
 }
 ```

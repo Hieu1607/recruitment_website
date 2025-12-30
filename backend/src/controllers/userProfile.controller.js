@@ -25,8 +25,9 @@ const updateMyProfile = async (req, res, next) => {
       if (req.files.avatar && req.files.avatar[0]) {
         files.avatar = req.files.avatar[0];
       }
-      if (req.files.cv && req.files.cv[0]) {
-        files.cv = req.files.cv[0];
+      // Handle multiple CV files
+      if (req.files.cv && req.files.cv.length > 0) {
+        files.cv = req.files.cv;
       }
     }
 
