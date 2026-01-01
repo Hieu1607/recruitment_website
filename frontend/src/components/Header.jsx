@@ -18,7 +18,7 @@ const Header = ({ isAuthenticated, user, logout }) => {
       <div className="header-left">
         <div className="logo" onClick={() => navigate('/')}>JobCV</div>
         <nav className="nav-menu">
-          <span className="nav-item">Việc làm</span>
+          <span className="nav-item" onClick={() => navigate('/')}>Việc làm</span>
           <span className="nav-item">Hồ sơ & CV</span>
           <span className="nav-item">Công ty</span>
         </nav>

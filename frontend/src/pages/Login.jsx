@@ -18,12 +18,9 @@ const Login = ({ goRegister }) => {
     setLoading(true);
 
     try {
-      // Gọi hàm login từ AuthContext
       await login(email, password);
-      // Điều hướng sau khi đăng nhập thành công
       navigate('/'); 
     } catch (err) {
-      // Hiển thị lỗi cụ thể từ server hoặc lỗi mặc định
       setError(err.response?.data?.message || 'Sai email hoặc mật khẩu');
     } finally {
       setLoading(false);
@@ -33,7 +30,7 @@ const Login = ({ goRegister }) => {
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
-        {/* BÊN TRÁI: BANNER */}
+        {/*  BANNER */}
         <div className="auth-banner">
           <div className="banner-text">
             <h2>Chào mừng trở lại</h2>
@@ -41,7 +38,7 @@ const Login = ({ goRegister }) => {
           </div>
         </div>
 
-        {/* BÊN PHẢI: FORM */}
+        {/*  FORM */}
         <div className="auth-form-container">
           <div className="auth-header">
             <h2>Đăng nhập</h2>
@@ -85,7 +82,7 @@ const Login = ({ goRegister }) => {
             <span
               className="auth-link"
               style={{ cursor: 'pointer', color: '#2563eb', marginLeft: '5px' }}
-              onClick={goRegister || (() => navigate('/register'))} // Backup nếu không có prop goRegister
+              onClick={goRegister || (() => navigate('/register'))}   
             >
               Đăng ký
             </span>

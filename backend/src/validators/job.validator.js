@@ -40,7 +40,7 @@ const deleteJobValidation = [
 
 const listJobsValidation = [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
-  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
+  query('limit').optional().isInt({ min: 1, max: 10000 }).withMessage('Limit must be between 1 and 100'),
   query('search').optional().trim().isLength({ max: 255 }).withMessage('Search term must not exceed 255 characters'),
   query('location').optional().trim().isLength({ max: 255 }).withMessage('Location filter must not exceed 255 characters'),
   query('company_id').optional().isInt({ min: 1 }).withMessage('company_id must be a positive integer'),

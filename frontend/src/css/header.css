@@ -12,7 +12,7 @@
     z-index: 1000;
 }
 
-/* Phần bên trái: Logo + Menu */
+
 .header-left {
     display: flex;
     align-items: center;
@@ -22,7 +22,7 @@
 .logo {
     font-size: 24px;
     font-weight: 800;
-    color: #00b14f; /* Màu xanh TopCV */
+    color: #00b14f;
     cursor: pointer;
     letter-spacing: -1px;
 }
@@ -43,14 +43,14 @@
     color: #00b14f;
 }
 
-/* Phần bên phải: Các nút bấm */
+
 .header-right {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-/* Style chung cho các nút */
+
 .btn {
     padding: 8px 16px;
     border-radius: 4px;
@@ -60,7 +60,6 @@
     transition: all 0.2s;
 }
 
-/* Nút Đăng ký (Viền xanh, nền trắng) */
 .btn-register {
     background-color: white;
     border: 1px solid #00b14f;
@@ -71,7 +70,6 @@
     background-color: #f0fdf4;
 }
 
-/* Nút Đăng nhập (Nền xanh, chữ trắng) */
 .btn-login {
     background-color: #00b14f;
     border: 1px solid #00b14f;
@@ -82,7 +80,6 @@
     background-color: #009643;
 }
 
-/* Nút Nhà tuyển dụng (Màu xám đen - giống trong ảnh) */
 .btn-employer {
     background-color: #212f3f;
     border: 1px solid #212f3f;
