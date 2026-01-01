@@ -18,7 +18,20 @@ const updateMyProfile = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const updateData = req.body;
-    const profile = await userProfileService.updateMyProfile(userId, updateData);
+    const files = {};
+
+    // Extract files from multer if present
+    if (req.files) {
+      if (req.files.avatar && req.files.avatar[0]) {
+        files.avatar = req.files.avatar[0];
+      }
+      // Handle multiple CV files
+      if (req.files.cv && req.files.cv.length > 0) {
+        files.cv = req.files.cv;
+      }
+    }
+
+    const profile = await userProfileService.updateMyProfile(userId, updateData, files);
     return successResponse(res, 200, profile, 'Profile updated successfully');
   } catch (error) {
     next(error);
@@ -35,8 +48,19 @@ const getProfileByUserId = async (req, res, next) => {
   }
 };
 
+const deleteMyProfile = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    await userProfileService.deleteMyProfile(userId);
+    return successResponse(res, 200, null, 'Profile deleted successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getMyProfile,
   updateMyProfile,
   getProfileByUserId,
+  deleteMyProfile,
 };

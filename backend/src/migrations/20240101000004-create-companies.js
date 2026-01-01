@@ -50,6 +50,10 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: true,
             },
+            logo_company_url: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
             createdAt: {
                 type: Sequelize.DATE,
                 allowNull: false,
