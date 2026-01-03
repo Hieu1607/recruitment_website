@@ -1,17 +1,16 @@
-/* Header.css */
+/* src/css/header.css */
 .header-container {
     display: flex;
-    justify-content: space-between; /* Đẩy Logo sang trái, Nút sang phải */
+    justify-content: space-between;
     align-items: center;
-    padding: 0 40px; /* Khoảng cách lề 2 bên */
+    padding: 0 40px;
     height: 70px;
     background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Bóng mờ nhẹ dưới header */
-    position: sticky; /* Giữ header dính trên cùng khi cuộn */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: sticky;
     top: 0;
     z-index: 1000;
 }
-
 
 .header-left {
     display: flex;
@@ -43,13 +42,11 @@
     color: #00b14f;
 }
 
-
 .header-right {
     display: flex;
     align-items: center;
     gap: 12px;
 }
-
 
 .btn {
     padding: 8px 16px;
@@ -88,4 +85,63 @@
 
 .btn-employer:hover {
     opacity: 0.9;
+}
+
+/* --- Style cho user đã đăng nhập --- */
+
+.authenticated-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.applied-jobs-link {
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.applied-jobs-link:hover {
+    color: #00b14f;
+    text-decoration: underline;
+}
+
+.user-info-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.user-info-area:hover {
+    background-color: #f5f5f5;
+}
+
+.header-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #e0e0e0;
+}
+
+.user-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-logout {
+    margin-left: 5px;
+    font-size: 13px;
+    padding: 6px 12px;
 }

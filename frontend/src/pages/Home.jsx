@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom'; // --- QUAN TRỌNG: Import hook điều hướng
-import { useAuth } from '../context/AuthContext';
-import Header from '../components/Header.jsx';
+import { useNavigate } from 'react-router-dom';
 import jobService from '../services/jobService';
 import CompanyName from '../components/CompanyName';
 import JobFilter from '../components/JobFilter';
@@ -9,9 +7,8 @@ import '../css/home.css';
 import '../css/Pagination.css';
 
 const Home = () => {
-    const { user, logout } = useAuth();
-    const navigate = useNavigate(); // --- QUAN TRỌNG: Khởi tạo điều hướng
-    const isAuthenticated = !!user;
+    // Không cần lấy user, logout từ useAuth ở đây nữa vì Header đã chuyển sang App.jsx
+    const navigate = useNavigate();
 
     // --- State tìm kiếm ---
     const [keyword, setKeyword] = useState('');
@@ -172,7 +169,7 @@ const Home = () => {
 
     return (
         <div className="home-container">
-            <Header isAuthenticated={isAuthenticated} user={user} logout={logout} />
+            {/* ĐÃ XÓA HEADER Ở ĐÂY */}
 
             {/* --- HERO SECTION --- */}
             <div className="hero-section">

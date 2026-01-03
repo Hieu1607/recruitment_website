@@ -1,0 +1,265 @@
+/* src/css/profile.css */
+.profile-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.profile-card {
+    display: flex;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow: hidden;
+    min-height: 500px;
+}
+
+.profile-loading, .profile-error {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 18px;
+    color: #666;
+}
+
+/* Cột trái */
+.profile-sidebar {
+    width: 35%;
+    background-color: #f9fafb;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-right: 1px solid #eee;
+}
+
+.avatar-wrapper {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 20px;
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.profile-name {
+    margin: 0 0 30px 0;
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+    font-weight: 700;
+}
+
+.contact-info {
+    width: 100%;
+}
+
+.info-item {
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #555;
+    border-bottom: 1px dashed #ddd;
+    padding-bottom: 8px;
+}
+
+.info-item strong {
+    display: block;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+/* Cột phải */
+.profile-content {
+    width: 65%;
+    padding: 40px;
+}
+
+.section-title {
+    color: #00b14f;
+    border-bottom: 2px solid #00b14f;
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.detail-group {
+    margin-bottom: 25px;
+}
+
+.detail-group label {
+    display: block;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+.detail-group p {
+    color: #666;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.multiline-text {
+    white-space: pre-line;
+}
+
+.skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.skill-tag {
+    background-color: #e6f7ef;
+    color: #00b14f;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.cv-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.cv-link {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #f0f4f8;
+    color: #212f3f;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background 0.2s;
+    margin-bottom: 8px;
+}
+
+.cv-link:hover {
+    background-color: #e1e8ed;
+    color: #00b14f;
+}
+
+.btn-edit-profile {
+    margin-top: 20px;
+    background-color: #00b14f;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn-edit-profile:hover {
+    background-color: #009643;
+}
+
+.edit-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-top: 2px;
+}
+
+.name-input {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.edit-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.edit-input:focus, .edit-textarea:focus {
+    border-color: #00b14f;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 177, 79, 0.2);
+}
+
+/* Hiệu ứng Avatar khi Edit */
+.avatar-label-edit {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.profile-avatar.editing {
+    opacity: 0.7; /* Làm mờ ảnh một chút để nổi icon máy ảnh */
+}
+
+.camera-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 30px;
+    color: #333;
+    opacity: 0.8;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    padding: 10px;
+    pointer-events: none; /* Click xuyên qua icon để vào input file */
+}
+
+.avatar-label-edit:hover .camera-icon {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Nút bấm Action */
+.action-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+.btn-save {
+    background-color: #00b14f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-save:hover {
+    background-color: #009643;
+}
+
+.btn-cancel {
+    background-color: #e0e0e0;
+    color: #333;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-cancel:hover {
+    background-color: #d0d0d0;
+}
