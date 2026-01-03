@@ -1,3 +1,4 @@
+// src/pages/Profile.jsx
 import React, { useEffect, useState } from 'react';
 import { getMyProfile, updateMyProfile } from '../services/profileService';
 import '../css/profile.css';
@@ -204,7 +205,13 @@ const Profile = () => {
           </div>
 
           <div className="detail-group">
-            <label>Kỹ năng (ngăn cách bởi dấu phẩy)</label>
+            {/* --- ĐÃ SỬA ĐOẠN NÀY --- */}
+            <label>
+                Kỹ năng 
+                {isEditing && <span style={{fontWeight: 'normal', fontSize: '13px', color: '#666', marginLeft: '5px'}}>(ngăn cách bởi dấu phẩy)</span>}
+            </label>
+            {/* ----------------------- */}
+
             {isEditing ? (
                 <textarea name="skills" className="edit-textarea" rows="2" value={editData.skills} onChange={handleChange} placeholder="Java, React..." />
             ) : (
