@@ -174,15 +174,15 @@ const employerChat = async (companyId, question, jobId = null, jobApplicationId 
           include: [
             {
               model: UserProfile,
-              as: 'userProfile',
+              as: 'profile', // matches alias in models/index.js
             },
           ],
         },
       ],
     });
     
-    if (jobApplication && jobApplication.user && jobApplication.user.userProfile) {
-      jobseekerInfo = formatJobseekerInfo(jobApplication.user.userProfile);
+    if (jobApplication && jobApplication.user && jobApplication.user.profile) {
+      jobseekerInfo = formatJobseekerInfo(jobApplication.user.profile);
     }
   }
   

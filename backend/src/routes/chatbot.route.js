@@ -8,11 +8,11 @@ const router = express.Router();
 
 const chatbotController = require('../controllers/chatbot.controller');
 const { authenticate, authorizeJobseeker, authorizeEmployer } = require('../middlewares/auth');
-const { validate } = require('../middlewares/validator');
 const {
   guestChatValidator,
   jobseekerChatValidator,
   employerChatValidator,
+  handleValidationErrors,
 } = require('../validators/chatbot.validator');
 
 /**
@@ -22,7 +22,7 @@ const {
 router.post(
   '/guest',
   guestChatValidator,
-  validate,
+  handleValidationErrors,
   chatbotController.guestChatHandler
 );
 
@@ -35,7 +35,7 @@ router.post(
   authenticate,
   authorizeJobseeker,
   jobseekerChatValidator,
-  validate,
+  handleValidationErrors,
   chatbotController.jobseekerChatHandler
 );
 
@@ -48,7 +48,7 @@ router.post(
   authenticate,
   authorizeEmployer,
   employerChatValidator,
-  validate,
+  handleValidationErrors,
   chatbotController.employerChatHandler
 );
 

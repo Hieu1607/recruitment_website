@@ -3,7 +3,7 @@
  * Validation rules for chatbot endpoints
  */
 
-const { body, query } = require('express-validator');
+const { body, query, validationResult } = require('express-validator');
 
 const guestChatValidator = [
   body('question')
@@ -51,8 +51,26 @@ const employerChatValidator = [
     .withMessage('Job Application ID must be a positive integer'),
 ];
 
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const formatted = errors.array().map(e => ({ 
+      field: e.path || e.param, 
+      message: e.msg, 
+      value: e.value 
+    }));
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Validation failed', 
+      errors: formatted 
+    });
+  }
+  next();
+};
+
 module.exports = {
   guestChatValidator,
   jobseekerChatValidator,
   employerChatValidator,
+  handleValidationErrors,
 };

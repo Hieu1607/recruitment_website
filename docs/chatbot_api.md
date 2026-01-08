@@ -4,7 +4,7 @@ API endpoints for chatbot functionality with three different user types: Guest, 
 
 ## Base URL
 ```
-/api/chatbot
+/api/v1/chatbot
 ```
 
 ## Endpoints
@@ -41,7 +41,7 @@ Chat with the AI assistant without authentication.
 
 **Example using cURL:**
 ```bash
-curl -X POST http://localhost:3000/api/chatbot/guest \
+curl -X POST http://localhost:5000/api/v1/chatbot/guest \
   -H "Content-Type: application/json" \
   -d '{
     "question": "Làm thế nào để viết CV tốt?"
@@ -50,7 +50,7 @@ curl -X POST http://localhost:3000/api/chatbot/guest \
 
 **Example using JavaScript:**
 ```javascript
-const response = await fetch('http://localhost:3000/api/chatbot/guest', {
+const response = await fetch('http://localhost:5000/api/v1/chatbot/guest', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ Authorization: Bearer <jwt_token>
 
 **Example using cURL:**
 ```bash
-curl -X POST http://localhost:3000/api/chatbot/jobseeker \
+curl -X POST http://localhost:5000/api/v1/chatbot/jobseeker \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -d '{
@@ -116,7 +116,7 @@ curl -X POST http://localhost:3000/api/chatbot/jobseeker \
 ```javascript
 const token = localStorage.getItem('token');
 
-const response = await fetch('http://localhost:3000/api/chatbot/jobseeker', {
+const response = await fetch('http://localhost:5000/api/v1/chatbot/jobseeker', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -179,7 +179,7 @@ Authorization: Bearer <jwt_token>
 
 **Example using cURL:**
 ```bash
-curl -X POST http://localhost:3000/api/chatbot/employer \
+curl -X POST http://localhost:5000/api/v1/chatbot/employer \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -d '{
@@ -194,7 +194,7 @@ curl -X POST http://localhost:3000/api/chatbot/employer \
 ```javascript
 const token = localStorage.getItem('token');
 
-const response = await fetch('http://localhost:3000/api/chatbot/employer', {
+const response = await fetch('http://localhost:5000/api/v1/chatbot/employer', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -214,7 +214,7 @@ console.log(data);
 
 **Example with only company info:**
 ```javascript
-const response = await fetch('http://localhost:3000/api/chatbot/employer', {
+const response = await fetch('http://localhost:5000/api/v1/chatbot/employer', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
