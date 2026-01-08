@@ -543,7 +543,7 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsInJvbGVfaWQiOjIsImlhdCI6MTc2NTY4Mjg1NiwiZXhwIjoxNzY1NzY5MjU2fQ.Z8dJZG8b2KYZHlY0L9WK4pGAMTd5nAo6pZ4WiczqDDw",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJkdW1teUBleGFtcGxlLmNvbSIsInJvbGVfaWQiOjIsImlhdCI6MTc2NTg1MTQyOCwiZXhwIjoxNzY1OTM3ODI4fQ.Lqw28Dpc9VilsQZlb-Ceesolf4ykbqjeDN0oBTER20w",
 								"type": "text"
 							}
 						],
@@ -1124,6 +1124,127 @@
 								"v1",
 								"applications",
 								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Chatbot",
+			"item": [
+				{
+					"name": "Guest question",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"question\": \"Làm thế nào để viết CV tốt?\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/chatbot/guest",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"chatbot",
+								"guest"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Jobseeker question",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJqaHV5QGV4YW1wbGUuY29tIiwicm9sZV9pZCI6MywiaWF0IjoxNzY3ODY2NTM1LCJleHAiOjE3Njc5NTI5MzV9.kUiaRxngEI5tMzILZeEoiWU0YJeCIqXJJfM9aFe1zwI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"question\": \"CV của tôi có phù hợp làm Backend Developer không?\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/chatbot/jobseeker",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"chatbot",
+								"jobseeker"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Employer question",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"question\": \"Làm thế nào để viết CV tốt?\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/chatbot/guest",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"chatbot",
+								"guest"
 							]
 						}
 					},
