@@ -1,11 +1,11 @@
 /**
  * JobApplication Service
  */
-const { JobApplication, Job, Company } = require('../models');
+const { JobApplication, Job, Company, UserProfile } = require('../models');
 const { NotFoundError, ForbiddenError, BadRequestError } = require('../utils/errors');
 const { Op } = require('sequelize');
 
-const applyForJob = async (jobId, userId) => {
+const applyForJob = async (jobId, userId, cvUrl = null) => {
   const job = await Job.findByPk(jobId);
   if (!job) throw new NotFoundError('Job not found');
 
@@ -17,9 +17,27 @@ const applyForJob = async (jobId, userId) => {
     throw new BadRequestError('You have already applied for this job');
   }
 
+  // If cv_url not provided, find user's CV from profile
+  let finalCvUrl = cvUrl;
+  if (!finalCvUrl) {
+    const userProfile = await UserProfile.findOne({ where: { user_id: userId } });
+    if (!userProfile) {
+      throw new BadRequestError('User profile not found. Please create your profile first.');
+    }
+    
+    const cvList = userProfile.cv_url; // This is an array due to getter
+    if (!cvList || cvList.length === 0) {
+      throw new BadRequestError('No CV found. Please upload at least one CV to your profile.');
+    }
+    
+    // Use the first CV in the list
+    finalCvUrl = cvList[0];
+  }
+
   const application = await JobApplication.create({
     job_id: jobId,
     user_id: userId,
+    cv_url: finalCvUrl,
     status: 'applied',
   });
 

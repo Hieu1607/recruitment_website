@@ -9,6 +9,8 @@ Authentication: Protected endpoints require JWT in `Authorization: Bearer <token
 ## POST /applications (Protected)
 Apply for a job. Each user can only apply once per job.
 
+**Note:** If `cv_url` is not provided, the system will automatically use the first CV from your profile. You must have at least one CV uploaded to apply for jobs.
+
 **Headers:**
 ```
 Authorization: Bearer <token>
@@ -18,7 +20,8 @@ Content-Type: application/json
 **Request Body:**
 ```json
 {
-  "job_id": 101
+  "job_id": 101,
+  "cv_url": "https://example.com/cv/user10_cv1.pdf" // optional - If not provided, first CV from profile will be used
 }
 ```
 
@@ -27,7 +30,7 @@ Content-Type: application/json
 curl -X POST "http://localhost:5000/api/v1/applications" \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
-  -d '{ "job_id": 101 }'
+  -d '{ "job_id": 101, "cv_url": "https://example.com/cv/user10_cv1.pdf" }'
 ```
 
 **Example Response (201):**
@@ -39,6 +42,7 @@ curl -X POST "http://localhost:5000/api/v1/applications" \
     "id": 1,
     "job_id": 101,
     "user_id": 10,
+    "cv_url": "https://example.com/cv/user10_cv1.pdf",
     "status": "applied",
     "created_at": "2025-12-16T10:30:00.000Z"
   }
@@ -50,6 +54,22 @@ curl -X POST "http://localhost:5000/api/v1/applications" \
 {
   "success": false,
   "error": "You have already applied for this job"
+}
+```
+
+**Error (400 - No CV Found):**
+```json
+{
+  "success": false,
+  "error": "No CV found. Please upload at least one CV to your profile."
+}
+```
+
+**Error (400 - Profile Not Found):**
+```json
+{
+  "success": false,
+  "error": "User profile not found. Please create your profile first."
 }
 ```
 
@@ -85,6 +105,7 @@ curl -X GET "http://localhost:5000/api/v1/applications/my-applications?page=1&li
       "id": 1,
       "job_id": 101,
       "user_id": 10,
+      "cv_url": "https://example.com/cv/user10_cv1.pdf",
       "status": "under_review",
       "created_at": "2025-12-16T10:30:00.000Z",
       "job": {
@@ -137,6 +158,7 @@ curl -X GET "http://localhost:5000/api/v1/applications/job/101?page=1&limit=20&s
       "id": 1,
       "job_id": 101,
       "user_id": 10,
+      "cv_url": "https://example.com/cv/user10_cv1.pdf",
       "status": "applied",
       "created_at": "2025-12-16T10:30:00.000Z"
     },
@@ -144,6 +166,7 @@ curl -X GET "http://localhost:5000/api/v1/applications/job/101?page=1&limit=20&s
       "id": 2,
       "job_id": 101,
       "user_id": 11,
+      "cv_url": "https://example.com/cv/user11_cv.pdf",
       "status": "applied",
       "created_at": "2025-12-16T10:45:00.000Z"
     }
@@ -186,6 +209,7 @@ curl -X GET "http://localhost:5000/api/v1/applications/1"
     "id": 1,
     "job_id": 101,
     "user_id": 10,
+    "cv_url": "https://example.com/cv/user10_cv1.pdf",
     "status": "under_review",
     "created_at": "2025-12-16T10:30:00.000Z"
   }
@@ -239,6 +263,7 @@ curl -X PUT "http://localhost:5000/api/v1/applications/1" \
     "id": 1,
     "job_id": 101,
     "user_id": 10,
+    "cv_url": "https://example.com/cv/user10_cv1.pdf",
     "status": "interview_scheduled",
     "created_at": "2025-12-16T10:30:00.000Z"
   }

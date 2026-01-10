@@ -5,6 +5,7 @@ const { body, param, query, validationResult } = require('express-validator');
 
 const createApplicationValidation = [
   body('job_id').isInt({ min: 1 }).withMessage('job_id is required and must be a positive integer'),
+  body('cv_url').optional().isURL().withMessage('cv_url must be a valid URL'),
 ];
 
 const updateApplicationValidation = [

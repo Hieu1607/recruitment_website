@@ -28,6 +28,11 @@ module.exports = {
                 onUpdate: 'CASCADE',
                 onDelete: 'CASCADE',
             },
+            cv_url: {
+                type: Sequelize.STRING,
+                allowNull: false,
+                comment: 'URL of the CV used for this application',
+            },
             status: {
                 type: Sequelize.STRING,
                 allowNull: true,

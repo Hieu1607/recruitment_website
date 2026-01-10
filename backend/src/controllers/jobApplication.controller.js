@@ -7,8 +7,8 @@ const { successResponse } = require('../utils/response');
 const applyForJob = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { job_id } = req.body;
-    const application = await jobApplicationService.applyForJob(job_id, userId);
+    const { job_id, cv_url } = req.body;
+    const application = await jobApplicationService.applyForJob(job_id, userId, cv_url);
     return successResponse(res, 201, application, 'Application submitted successfully');
   } catch (error) {
     next(error);

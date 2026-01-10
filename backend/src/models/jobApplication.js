@@ -23,6 +23,11 @@ module.exports = (sequelize, DataTypes) => {
                     key: 'id',
                 },
             },
+            cv_url: {
+                type: DataTypes.STRING,
+                allowNull: false,
+                comment: 'URL of the CV used for this application',
+            },
             status: {
                 type: DataTypes.STRING,
                 allowNull: true,
