@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.applied-page {
+    background-color: #f8fafc; /* Màu nền xám xanh nhạt rất hiện đại */
+    min-height: calc(100vh - 64px);
+    padding: 40px 20px;
+    font-family: 'Inter', sans-serif;
+}
+
+.applied-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.page-header {
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    color: #64748b;
+    font-size: 16px;
+}
+
+/* --- EMPTY STATE --- */
+.empty-state {
+    background: white;
+    border-radius: 16px;
+    padding: 60px 20px;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.empty-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: #334155;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #94a3b8;
+    margin-bottom: 30px;
+}
+
+.btn-find-now {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-find-now:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* --- GRID LAYOUT --- */
+.application-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Mặc định 1 cột */
+    gap: 20px;
+}
+
+/* --- APP CARD --- */
+.app-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* HEADER CARD */
+.app-card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.company-logo-small {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
+    padding: 4px;
+    background: #fff;
+}
+
+.app-basic-info {
+    flex: 1;
+}
+
+.app-basic-info h3 {
+    margin: 0 0 6px 0;
+    font-size: 18px;
+    color: #0f172a;
+    cursor: pointer;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.app-basic-info h3:hover {
+    color: #2563eb;
+}
+
+.app-basic-info p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* BADGES */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge-pending { background: #f1f5f9; color: #475569; }
+.badge-reviewing { background: #fff7ed; color: #ea580c; }
+.badge-accepted { background: #f0fdf4; color: #16a34a; }
+.badge-rejected { background: #fef2f2; color: #dc2626; }
+
+/* BODY CARD */
+.app-card-body {
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.info-row .label { color: #94a3b8; }
+.info-row .value { color: #334155; font-weight: 500; }
+
+/* FOOTER CARD */
+.app-card-footer {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-detail {
+    padding: 8px 16px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-detail:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+.btn-contact {
+    padding: 8px 16px;
+    background: #2563eb;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-contact:hover {
+    background: #1d4ed8;
+}
+
+/* RESPONSIVE */
+@media (max-width: 640px) {
+    .app-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .status-badge {
+        align-self: flex-start;
+    }
+}

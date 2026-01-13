@@ -1,53 +1,32 @@
+// src/pages/Register.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Bổ sung để điều hướng linh hoạt
+import { useNavigate, Link } from 'react-router-dom';
 import authService from '../services/authService';
-import '../css/Login.css';
+import { ROLE_ID } from '../utils/roles'; 
+import '../css/login.css'; // Đảm bảo import đúng file CSS vừa sửa
 
-const Register = ({ goLogin }) => {
-  const [fullName, setFullName] = useState('');
+const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [fullName, setFullName] = useState('');
   
+  // Mặc định chọn Ứng viên
+  const [selectedRole, setSelectedRole] = useState(ROLE_ID.JOB_SEEKER); 
+  
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    setError('');
-
-    // Validation cơ bản tại client
-    if (password !== confirmPassword) {
-      return setError('Mật khẩu xác nhận không khớp');
-    }
-
-    if (password.length < 6) {
-      return setError('Mật khẩu phải có ít nhất 6 ký tự');
-    }
-
-    setLoading(true);
     try {
-      await authService.register({
-        fullName,
-        email,
-        password
-      });
-
-      alert('Đăng ký thành công! Vui lòng đăng nhập.');
+      setLoading(true);
+      await authService.register(email, password, fullName, selectedRole);
       
-      // Ưu tiên goLogin từ props, nếu không có thì dùng navigate
-      if (goLogin) {
-        goLogin();
-      } else {
-        navigate('/login');
-      }
-    } catch (err) {
-      if (err.response?.status === 409) {
-        setError('Email đã được đăng ký trên hệ thống');
-      } else {
-        setError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
-      }
+      alert('Đăng ký thành công! Vui lòng đăng nhập.');
+      navigate('/login');
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.error || 'Đăng ký thất bại');
     } finally {
       setLoading(false);
     }
@@ -56,91 +35,84 @@ const Register = ({ goLogin }) => {
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
-        {/* BÊN TRÁI: BANNER */}
-        <div
-          className="auth-banner"
-          style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')"
-          }}
-        >
+        
+        {/* Banner bên trái - Tự động ẩn trên mobile nhờ CSS */}
+        <div className="auth-banner">
           <div className="banner-text">
-            <h2>Khởi đầu sự nghiệp</h2>
-            <p>Tạo tài khoản để nhà tuyển dụng tìm thấy bạn</p>
+            <h2>Khởi đầu hành trình mới</h2>
+            <p>Kết nối với hàng nghìn cơ hội việc làm và ứng viên tiềm năng ngay hôm nay.</p>
           </div>
         </div>
 
-        {/* BÊN PHẢI: FORM */}
+        {/* Form bên phải */}
         <div className="auth-form-container">
           <div className="auth-header">
-            <h2>Đăng ký</h2>
-            <p>Hoàn toàn miễn phí cho ứng viên</p>
+            <h2>Đăng ký tài khoản</h2>
+            <p>Chọn vai trò của bạn để bắt đầu</p>
           </div>
 
-          {error && <div className="error-message" style={{ color: '#ef4444', marginBottom: '15px', fontSize: '14px' }}>{error}</div>}
+          {/* --- TABS CHỌN ROLE (Đã khớp class với CSS mới) --- */}
+          <div className="role-tabs">
+            <div 
+                className={`role-tab-btn ${selectedRole === ROLE_ID.JOB_SEEKER ? 'active' : ''}`}
+                onClick={() => setSelectedRole(ROLE_ID.JOB_SEEKER)}
+            >
+                👤 Ứng viên
+            </div>
+            
+            <div 
+                className={`role-tab-btn ${selectedRole === ROLE_ID.EMPLOYER ? 'active' : ''}`}
+                onClick={() => setSelectedRole(ROLE_ID.EMPLOYER)}
+            >
+                🏢 Nhà tuyển dụng
+            </div>
+          </div>
+          {/* ----------------------------- */}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleRegister}>
             <div className="form-group">
               <label>Họ và tên</label>
-              <input
-                type="text"
+              <input 
+                type="text" 
                 className="form-input"
-                placeholder="Nguyễn Văn A"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                required
+                required 
+                placeholder={selectedRole === ROLE_ID.EMPLOYER ? "Tên người liên hệ" : "Nguyễn Văn A"}
               />
             </div>
 
             <div className="form-group">
               <label>Email</label>
-              <input
-                type="email"
+              <input 
+                type="email" 
                 className="form-input"
-                placeholder="email@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
+                required 
+                placeholder="email@example.com"
               />
             </div>
 
             <div className="form-group">
               <label>Mật khẩu</label>
-              <input
-                type="password"
+              <input 
+                type="password" 
                 className="form-input"
-                placeholder="******"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Xác nhận mật khẩu</label>
-              <input
-                type="password"
-                className="form-input"
-                placeholder="******"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
+                required 
+                placeholder="••••••••"
               />
             </div>
 
             <button type="submit" className="auth-btn" disabled={loading}>
-              {loading ? 'Đang xử lý...' : 'Đăng ký'}
+              {loading ? 'Đang xử lý...' : `Đăng ký làm ${selectedRole === ROLE_ID.EMPLOYER ? 'Nhà tuyển dụng' : 'Ứng viên'}`}
             </button>
           </form>
-
-          <div className="auth-footer">
-            Đã có tài khoản?
-            <span
-              className="auth-link"
-              style={{ cursor: 'pointer', color: '#2563eb', marginLeft: '5px' }}
-              onClick={goLogin || (() => navigate('/login'))}
-            >
-              Đăng nhập
-            </span>
+          
+          <div className="register-link">
+            Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link>
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@ Node.js + ExpressJS backend API with PostgreSQL database.
 - `src/models/` - Database models/schemas
 - `src/routes/` - API route definitions (public, jobseeker, employer)
 - `src/middlewares/` - Authentication, error handling, validation
-- `src/utils/` - Helper functions
+- `src/utils/` - Helper functions   
 - `src/seeders/` - Database seeding scripts and data
 
 ## Setup

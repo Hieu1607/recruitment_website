@@ -6,14 +6,35 @@ import JobFilter from '../components/JobFilter';
 import '../css/home.css';
 import '../css/Pagination.css';
 
+// --- DANH SÁCH 63 TỈNH THÀNH ---
+const VIETNAM_PROVINCES = [
+    "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Hải Phòng", "Cần Thơ",
+    "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu",
+    "Bắc Ninh", "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước",
+    "Bình Thuận", "Cà Mau", "Cao Bằng", "Đắk Lắk", "Đắk Nông",
+    "Điện Biên", "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang",
+    "Hà Nam", "Hà Tĩnh", "Hải Dương", "Hậu Giang", "Hòa Bình",
+    "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu",
+    "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Long An", "Nam Định",
+    "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên",
+    "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị",
+    "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên",
+    "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "Trà Vinh", "Tuyên Quang",
+    "Vĩnh Long", "Vĩnh Phúc", "Yên Bái"
+];
+
 const Home = () => {
-    // Không cần lấy user, logout từ useAuth ở đây nữa vì Header đã chuyển sang App.jsx
     const navigate = useNavigate();
 
     // --- State tìm kiếm ---
     const [keyword, setKeyword] = useState('');
-    const [location, setLocation] = useState('all');
-    const [showSuggestions, setShowSuggestions] = useState(false);
+    
+    // State cho địa điểm: Mặc định rỗng để hiện placeholder
+    const [location, setLocation] = useState(''); 
+    const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+
+    // State hiển thị gợi ý từ khóa
+    const [showSuggestions, setShowSuggestions] = useState(false); 
 
     // --- State bộ lọc ---
     const [advancedFilters, setAdvancedFilters] = useState({
@@ -28,7 +49,6 @@ const Home = () => {
     const [suggestedJobs, setSuggestedJobs] = useState([]);
     const [jobResults, setJobResults] = useState([]);
     
-    // Mặc định là true để hiển thị danh sách ngay lập tức
     const [hasSearched, setHasSearched] = useState(true); 
     const [loading, setLoading] = useState(true); 
 
@@ -36,22 +56,17 @@ const Home = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    // 1. Tải cả gợi ý VÀ danh sách việc làm ngay khi vào trang
     useEffect(() => {
         const fetchInitialData = async () => {
             setLoading(true);
             try {
-                // Gọi song song cả 2 API
                 const [suggestionData, allJobsData] = await Promise.all([
                     jobService.getSuggestions(),
-                    jobService.getJobs('', 'all') // Lấy tất cả việc làm (nhờ limit 10000 bên service)
+                    jobService.getJobs('', 'all')
                 ]);
 
-                // Set dữ liệu gợi ý
                 setPopularKeywords(suggestionData.keywords || []);
                 setSuggestedJobs(suggestionData.jobs || []);
-
-                // Set dữ liệu việc làm chính
                 setJobResults(allJobsData || []);
                 
             } catch (error) {
@@ -64,14 +79,16 @@ const Home = () => {
         fetchInitialData();
     }, []);
 
-    // 2. Hàm xử lý tìm kiếm (Khi người dùng bấm nút Tìm)
     const executeSearch = async (searchKeyword, searchLocation) => {
         setLoading(true);
         setHasSearched(true);
         setCurrentPage(1);
 
         try {
-            const results = await jobService.getJobs(searchKeyword, searchLocation);
+            // Logic: Nếu location rỗng hoặc "Tất cả..." -> gửi 'all' lên server
+            const locToSend = (!searchLocation || searchLocation === 'Tất cả địa điểm') ? 'all' : searchLocation;
+            
+            const results = await jobService.getJobs(searchKeyword, locToSend);
             setJobResults(results || []);
         } catch (error) {
             setJobResults([]);
@@ -82,14 +99,41 @@ const Home = () => {
 
     const handleSearchBtn = () => {
         setShowSuggestions(false);
+        setShowLocationSuggestions(false);
         executeSearch(keyword, location);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearchBtn();
+        }
+    };
+
+    // --- LOGIC GỢI Ý ĐỊA ĐIỂM ---
+    const locationSuggestions = useMemo(() => {
+        // Nếu chưa nhập gì, gợi ý 5 thành phố lớn
+        if (!location) return ["Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Bình Dương", "Cần Thơ"];
+        
+        // Nếu đã nhập, lọc danh sách và lấy 5 kết quả
+        return VIETNAM_PROVINCES.filter(prov => 
+            prov.toLowerCase().includes(location.toLowerCase())
+        ).slice(0, 5);
+    }, [location]);
+
+    const handleSelectLocation = (prov) => {
+        setLocation(prov);
+        setShowLocationSuggestions(false);
+    };
+
+    // --- Xử lý gợi ý từ khóa ---
+    const handleSelectKeyword = (kw) => {
+        setKeyword(kw);
+        setShowSuggestions(false);
+        executeSearch(kw, location);
     };
 
     const handleFilterChange = (newFilters) => {
         setAdvancedFilters(newFilters);
-        if (!hasSearched) {
-            executeSearch(keyword, location);
-        }
         setCurrentPage(1);
     };
 
@@ -134,17 +178,15 @@ const Home = () => {
                 if (!hasCategoryMatch) isMatch = false;
             }
 
-            // Lọc Địa điểm
-            if (location !== 'all') {
+            // --- LỌC ĐỊA ĐIỂM ---
+            if (location && location !== 'all' && location !== 'Tất cả địa điểm') {
                 const locLower = (job.location || '').toLowerCase();
                 const filterLower = location.toLowerCase();
-                let cityKey = "";
-
-                if (filterLower === 'hanoi') cityKey = "hà nội";
-                else if (filterLower === 'hcm') cityKey = "hồ chí minh";
-                else if (filterLower === 'danang') cityKey = "đà nẵng";
-
-                if (cityKey && !locLower.includes(cityKey)) isMatch = false;
+                
+                // So sánh chuỗi (Flexible search)
+                if (!locLower.includes(filterLower)) {
+                    isMatch = false;
+                }
             }
 
             return isMatch;
@@ -169,38 +211,63 @@ const Home = () => {
 
     return (
         <div className="home-container">
-            {/* ĐÃ XÓA HEADER Ở ĐÂY */}
-
-            {/* --- HERO SECTION --- */}
             <div className="hero-section">
                 <h1 className="hero-title">
-                    <span style={{ color: '#60a5fa' }}>JopCV</span> - Tìm việc làm nhanh chóng
+                    <span style={{ color: '#60a5fa' }}>JobCV</span> - Tìm việc làm nhanh chóng
                 </h1>
 
                 <div className="search-container">
-                    <div className="search-input-group">
+                    {/* 1. Ô NHẬP TỪ KHÓA (Chiếm nhiều không gian hơn: flex 1) */}
+                    <div className="search-input-group" style={{ flex: 1 }}>
                         <span className="search-icon">🔍</span>
                         <input
                             type="text" className="search-input"
                             placeholder="Vị trí tuyển dụng, tên công ty..."
-                            value={keyword} onChange={(e) => setKeyword(e.target.value)}
+                            value={keyword}
+                            onChange={(e) => setKeyword(e.target.value)}
+                            onKeyDown={handleKeyDown}
                             onFocus={() => setShowSuggestions(true)}
                             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                         />
                     </div>
-                    <div className="divider"></div>
-                    <div className="search-input-group" style={{ flex: 0.6 }}>
+                    
+                    {/* 2. Ô NHẬP ĐỊA ĐIỂM (Bé hơn: flex 0.35 và minWidth) */}
+                    <div 
+                        className="search-input-group" 
+                        style={{ flex: 0.35, position: 'relative', minWidth: '200px' }}
+                    >
                         <span className="search-icon">📍</span>
-                        <select className="search-input" value={location} onChange={(e) => setLocation(e.target.value)}>
-                            <option value="all">Tất cả địa điểm</option>
-                            <option value="hanoi">Hà Nội</option>
-                            <option value="hcm">Hồ Chí Minh</option>
-                            <option value="danang">Đà Nẵng</option>
-                        </select>
+                        <input 
+                            type="text" 
+                            className="search-input"
+                            placeholder="Tỉnh/Thành phố"
+                            value={location === 'all' ? '' : location}
+                            onChange={(e) => {
+                                setLocation(e.target.value);
+                                setShowLocationSuggestions(true);
+                            }}
+                            onFocus={() => setShowLocationSuggestions(true)}
+                            onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 200)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleSearchBtn();
+                            }}
+                        />
+                        
+                        {/* DANH SÁCH GỢI Ý ĐỊA ĐIỂM (Dropdown) */}
+                        {showLocationSuggestions && locationSuggestions.length > 0 && (
+                            <ul className="location-suggestions-list">
+                                {locationSuggestions.map((prov, idx) => (
+                                    <li key={idx} onClick={() => handleSelectLocation(prov)}>
+                                        {prov}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
+
                     <button className="search-btn" onClick={handleSearchBtn}>Tìm kiếm</button>
 
-                    {/* Gợi ý Dropdown */}
+                    {/* GỢI Ý TỪ KHÓA (CŨ) */}
                     {showSuggestions && (
                         <div className="search-suggestions">
                             <div className="suggestion-body">
@@ -208,7 +275,7 @@ const Home = () => {
                                     <div className="suggestion-title">Từ khóa phổ biến</div>
                                     <ul className="keyword-list">
                                         {popularKeywords.map((kw, i) => (
-                                            <li key={i} className="keyword-item" onClick={() => setKeyword(kw)}>
+                                            <li key={i} className="keyword-item" onClick={() => handleSelectKeyword(kw)}>
                                                 <span className="keyword-icon">↗</span> {kw}
                                             </li>
                                         ))}
@@ -219,7 +286,6 @@ const Home = () => {
                                     {suggestedJobs.map((job, index) => (
                                         <div key={job.id || index} className="job-item" style={{ paddingLeft: 0 }}>
                                             <div className="job-info">
-                                                {/* Thêm onClick chuyển trang ở đây cho phần gợi ý luôn */}
                                                 <h4 
                                                     style={{ fontSize: '15px', color: '#2563eb', cursor: 'pointer' }}
                                                     onClick={() => navigate(`/jobs/${job.id}`)}
@@ -239,35 +305,27 @@ const Home = () => {
                 </div>
             </div>
 
-            {/* --- MAIN CONTENT --- */}
             <div className="main-content">
                 <div className="content-layout">
-
-                    {/* Sidebar Filters */}
                     <div className="sidebar-wrapper">
                         <JobFilter onFilterChange={handleFilterChange} />
                     </div>
 
-                    {/* Job List */}
                     <div className="job-list-wrapper">
-
-                        {/* Loading */}
                         {loading && (
                             <div className="loading-text">Đang tải danh sách việc làm...</div>
                         )}
 
-                        {/* Kết quả tìm kiếm & Danh sách mặc định */}
                         {!loading && (
                             <>
                                 <h2 className="section-title">
-                                    {keyword ? 'Kết quả tìm kiếm' : 'Tất cả việc làm'}
+                                    {keyword ? `Kết quả tìm kiếm cho "${keyword}"` : 'Tất cả việc làm'}
                                 </h2>
 
                                 <div className="job-grid">
                                     {currentJobs.length > 0 ? currentJobs.map((job, index) => (
                                         <div key={job.id || index} className="job-card">
                                             <div>
-                                                {/* --- QUAN TRỌNG: SỰ KIỆN CLICK CHUYỂN TRANG --- */}
                                                 <h3 
                                                     className="job-card-title"
                                                     style={{ cursor: 'pointer', color: '#2563eb' }}
@@ -298,12 +356,11 @@ const Home = () => {
                                         </div>
                                     )) : (
                                         <div className="no-result">
-                                            <p>Không tìm thấy kết quả nào.</p>
+                                            <p>Không tìm thấy kết quả nào phù hợp.</p>
                                         </div>
                                     )}
                                 </div>
 
-                                {/* THANH PHÂN TRANG */}
                                 {filteredJobs.length > 0 && (
                                     <div className="pagination-container">
                                         <button
@@ -330,11 +387,7 @@ const Home = () => {
 
                                             return pageNumbers.map((number, index) => {
                                                 if (number === '...') {
-                                                    return (
-                                                        <span key={`ellipsis-${index}`} className="pagination-ellipsis" style={{ padding: '0 10px' }}>
-                                                            ...
-                                                        </span>
-                                                    );
+                                                    return <span key={`ellipsis-${index}`} className="pagination-ellipsis" style={{ padding: '0 10px' }}>...</span>;
                                                 }
                                                 return (
                                                     <button

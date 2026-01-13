@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api'; 
 
-// Nhận cả id và tên ban đầu (initialName)
 const CompanyName = ({ id, initialName }) => {
-  // Nếu có tên sẵn thì dùng luôn, không thì hiện "Đang tải..."
   const [name, setName] = useState(initialName || 'Đang tải...');
 
   useEffect(() => {
-    // Nếu đã có tên từ API list rồi thì KHÔNG gọi API chi tiết nữa
-    if (initialName && initialName !== "Công ty ẩn danh") {
+    // 1. Ưu tiên dùng tên có sẵn (không gọi API)
+    if (initialName && initialName !== "Công ty ẩn danh" && initialName !== "Đang tải...") {
         setName(initialName);
         return;
     }
 
-    // Nếu không có tên mà có ID thì mới đi gọi API
+    // 2. Nếu chỉ có ID, gọi API để lấy tên
     if (id) {
         const fetchName = async () => {
             try {
+                // LƯU Ý QUAN TRỌNG: Phải có /v1 ở đây vì api.js chưa có
                 const response = await api.get(`/v1/companies/${id}`);
                 const data = response.data.data || response.data;
+                
+                // Lấy đúng trường name từ response
                 setName(data.name || data.ten_cong_ty || `Công ty #${id}`);
             } catch (error) {
-                setName(`Công ty #${id}`);
+                // Nếu lỗi (404/500), hiện ID để giao diện không bị trống
+                setName(`Công ty #${id}`); 
+                // Tắt log lỗi để console sạch sẽ
             }
         };
         fetchName();
@@ -30,7 +33,7 @@ const CompanyName = ({ id, initialName }) => {
     }
   }, [id, initialName]);
 
-  return <span>{name}</span>;
+  return <span className="company-name-label">{name}</span>;
 };
 
 export default CompanyName;

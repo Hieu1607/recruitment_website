@@ -13,7 +13,7 @@ body {
     min-height: 100vh;
 }
 
-/* --- 2. HERO SECTION (Giữ nguyên của bạn) --- */
+/* --- 2. HERO SECTION --- */
 .hero-section {
     background: linear-gradient(135deg, #1e40af, #3b82f6);
     padding: 80px 20px 120px;
@@ -35,41 +35,52 @@ body {
     text-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* --- 3. SEARCH CONTAINER (Giữ nguyên) --- */
+/* --- 3. SEARCH CONTAINER --- */
 .search-container {
     position: relative;
     display: flex;
     background: #ffffff;
-    padding: 8px;
+    padding: 12px;
     border-radius: 16px;
     width: 100%;
     max-width: 950px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     align-items: center;
     z-index: 100;
+    gap: 10px;
 }
 
 .search-input-group {
     display: flex;
     align-items: center;
     flex: 1;
-    padding: 0 20px;
+    padding: 8px 16px;
     position: relative;
+    background-color: #f1f5f9;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.search-input-group:focus-within {
+    background-color: #fff;
+    box-shadow: 0 0 0 2px #bfdbfe;
 }
 
 .search-icon {
-    color: #94a3b8;
+    color: #64748b;
     margin-right: 12px;
     font-size: 20px;
+    flex-shrink: 0;
 }
 
 .search-input {
+    flex: 1;
     width: 100%;
     border: none;
     outline: none;
-    font-size: 16px;
+    font-size: 15px;
     color: #1e293b;
-    padding: 14px 0;
+    padding: 6px 0;
     font-weight: 500;
     background: transparent;
 }
@@ -89,23 +100,21 @@ select.search-input {
 }
 
 .divider {
-    width: 1px;
-    height: 32px;
-    background-color: #e2e8f0;
-    margin: 0 5px;
+    display: none; 
 }
 
 .search-btn {
     background-color: #2563eb;
     color: white;
     border: none;
-    padding: 14px 32px;
-    border-radius: 10px;
+    padding: 12px 28px;
+    border-radius: 8px;
     font-weight: 600;
     font-size: 16px;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+    height: 100%;
 }
 
 .search-btn:hover {
@@ -114,7 +123,7 @@ select.search-input {
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-/* --- 4. SUGGESTIONS MODAL (Giữ nguyên) --- */
+/* --- 4. SUGGESTIONS MODAL (Gợi ý từ khóa) --- */
 .search-suggestions {
     position: absolute;
     top: calc(100% + 15px);
@@ -128,6 +137,7 @@ select.search-input {
     text-align: left;
     animation: slideUp 0.2s ease-out;
     border: 1px solid #e2e8f0;
+    z-index: 50; /* Z-index thấp hơn autocomplete địa điểm */
 }
 
 @keyframes slideUp {
@@ -226,7 +236,7 @@ select.search-input {
     font-weight: 600;
 }
 
-/* --- 5. MAIN CONTENT LAYOUT (MỚI THÊM VÀO) --- */
+/* --- 5. MAIN CONTENT LAYOUT --- */
 .main-content {
     padding: 40px 20px;
     max-width: 1240px;
@@ -249,7 +259,7 @@ select.search-input {
     flex: 1;
 }
 
-/* --- 6. JOB CARD & GRID (Cập nhật mới) --- */
+/* --- 6. JOB CARD & GRID --- */
 .section-title {
     color: #1e293b;
     margin-bottom: 20px;
@@ -432,4 +442,47 @@ select.search-input {
         padding-bottom: 20px;
         padding-right: 0;
     }
+}
+
+/* --- 10. LOCATION AUTOCOMPLETE DROPDOWN (MỚI THÊM) --- */
+/* Phần này bắt buộc phải có để hiển thị danh sách gợi ý địa điểm */
+.location-suggestions-list {
+    position: absolute;
+    top: 100%;       /* Hiện ngay dưới ô input */
+    left: 0;
+    width: 100%;     /* Rộng bằng đúng cái ô nhập địa điểm */
+    background: white;
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0; /* Cách ra một chút cho đẹp */
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 1px solid #e2e8f0;
+    z-index: 9999;   /* Đảm bảo nó nổi lên trên cùng */
+    max-height: 200px; /* Chiều cao tối đa */
+    overflow-y: auto;  /* Cho phép cuộn nếu danh sách dài */
+}
+
+.location-suggestions-list li {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+    text-align: left;
+    background: white;
+}
+
+.location-suggestions-list li:hover {
+    background-color: #f0f9ff; /* Màu nền khi di chuột vào */
+    color: #0284c7;            /* Màu chữ xanh */
+}
+
+/* Tùy chỉnh thanh cuộn cho đẹp */
+.location-suggestions-list::-webkit-scrollbar {
+    width: 6px;
+}
+.location-suggestions-list::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
 }

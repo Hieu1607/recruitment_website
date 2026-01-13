@@ -1,25 +1,18 @@
 import axios from 'axios';
 
-// Kết hợp URL từ .env và thêm tiền tố /api
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api';
-
 const api = axios.create({
-    baseURL: API_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
+  baseURL: 'http://localhost:5000/api',
 });
 
-// Tự động gắn token vào header nếu có
 api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
 );
 
-export default api; 
+export default api;

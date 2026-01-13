@@ -200,3 +200,64 @@
     background: #93c5fd;
     cursor: not-allowed;
 }
+
+/* Style cho ô Thư giới thiệu (Textarea) */
+.input-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif; /* Đồng bộ font chữ với cả trang */
+    font-size: 14px;
+    color: #1f2937;
+    background-color: #fff;
+    resize: vertical; /* Chỉ cho phép kéo giãn chiều dọc, không phá vỡ chiều ngang */
+    min-height: 80px;
+    outline: none;
+    transition: all 0.2s;
+    box-sizing: border-box; /* Đảm bảo padding không làm ô bị to quá khổ */
+}
+
+.input-textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Hiệu ứng focus xanh nhạt */
+}
+
+.input-textarea::placeholder {
+    color: #9ca3af;
+}
+
+/* Style cho danh sách CV (Radio buttons) cho đẹp hơn */
+.cv-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 150px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.cv-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.cv-item:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+}
+
+/* Tùy chỉnh thanh cuộn cho danh sách CV */
+.cv-list::-webkit-scrollbar {
+    width: 6px;
+}
+.cv-list::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+}
