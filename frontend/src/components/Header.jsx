@@ -39,8 +39,6 @@ const Header = ({ isAuthenticated, user, logout }) => {
 
   // --- LOGIC HIỂN THỊ THÔNG TIN ---
   const displayName = userProfile?.full_name || user?.full_name || 'User';
-  
-  // ĐÃ SỬA: Dùng link placehold.co ổn định hơn
   const displayAvatar = userProfile?.avatar_url || 'https://placehold.co/150';
 
   return (
@@ -49,7 +47,10 @@ const Header = ({ isAuthenticated, user, logout }) => {
         <div className="logo" onClick={() => navigate('/')}>JobCV</div>
         <nav className="nav-menu">
           <span className="nav-item" onClick={() => navigate('/')}>Việc làm</span>
-          <span className="nav-item">Tạo CV</span>
+          
+          {/* ĐÃ SỬA: Thêm sự kiện onClick để chuyển trang */}
+          <span className="nav-item" onClick={() => navigate('/create-cv')}>Tạo CV</span>
+          
           <span className="nav-item" onClick={() => navigate('/companies')}>Công ty</span>
         </nav>
       </div>

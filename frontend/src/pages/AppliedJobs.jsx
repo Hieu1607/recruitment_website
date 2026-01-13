@@ -8,22 +8,11 @@ const AppliedJobs = () => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // --- DỮ LIỆU GIẢ ĐỂ TEST GIAO DIỆN (Xóa dòng này khi chạy thật) ---
-    // const MOCK_DATA = [
-    //     { id: 1, job_title: "Senior React Developer", company_name: "Tech Corp", status: "PENDING", created_at: "2023-10-20", company_logo: null },
-    //     { id: 2, job_title: "Backend Node.js", company_name: "Fintech Asia", status: "REVIEWING", created_at: "2023-10-18", company_logo: null },
-    //     { id: 3, job_title: "UI/UX Designer", company_name: "Creative Studio", status: "REJECTED", created_at: "2023-09-15", company_logo: null },
-    //     { id: 4, job_title: "Project Manager", company_name: "Global Soft", status: "ACCEPTED", created_at: "2023-11-01", company_logo: null },
-    // ];
-
     useEffect(() => {
         const fetchAppliedJobs = async () => {
             try {
                 const data = await jobService.getAppliedJobs();
                 setApplications(data || []); 
-                
-                // MỞ DÒNG DƯỚI NẾU MUỐN XEM GIAO DIỆN MẪU KHI CHƯA CÓ DATA THẬT
-                // setApplications(MOCK_DATA); 
             } catch (error) {
                 console.error("Lỗi tải lịch sử ứng tuyển:", error);
             } finally {
@@ -44,7 +33,7 @@ const AppliedJobs = () => {
         }
     };
 
-    if (loading) return <div className="loading-spinner">Is loading...</div>;
+    if (loading) return <div className="loading-spinner">Đang tải dữ liệu...</div>;
 
     return (
         <div className="applied-page">
@@ -67,8 +56,14 @@ const AppliedJobs = () => {
                     <div className="application-grid">
                         {applications.map((app) => {
                             const statusInfo = getStatusInfo(app.status);
+                            
+                            // ⚠️ LƯU Ý: Thay 'app.cv_url' bằng tên trường chính xác từ API của bạn
+                            // Ví dụ: app.cv_path, app.resume_link, v.v.
+                            const cvLink = app.cv_url || app.cv_file; 
+
                             return (
                                 <div key={app.id} className="app-card">
+                                    {/* --- HEADER: Logo, Tên Job, Công ty, Trạng thái --- */}
                                     <div className="app-card-header">
                                         <img 
                                             src={app.company_logo || "https://placehold.co/60x60?text=Logo"} 
@@ -77,29 +72,48 @@ const AppliedJobs = () => {
                                         />
                                         <div className="app-basic-info">
                                             <h3 onClick={() => navigate(`/jobs/${app.job_id || 1}`)}>{app.job_title}</h3>
-                                            <p>{app.company_name}</p>
+                                            <p className="company-name">{app.company_name}</p>
                                         </div>
                                         <span className={`status-badge ${statusInfo.className}`}>
                                             {statusInfo.icon} {statusInfo.label}
                                         </span>
                                     </div>
                                     
+                                    {/* --- BODY: Ngày nộp, File CV --- */}
                                     <div className="app-card-body">
                                         <div className="info-row">
-                                            <span className="label">Ngày nộp:</span>
+                                            <span className="label">📅 Ngày nộp:</span>
                                             <span className="value">{new Date(app.created_at).toLocaleDateString('vi-VN')}</span>
                                         </div>
-                                        {/* Bạn có thể thêm Lương hoặc Địa điểm vào đây nếu API trả về */}
+
+                                        {/* --- PHẦN MỚI THÊM: HIỂN THỊ FILE CV --- */}
+                                        <div className="info-row">
+                                            <span className="label">📄 CV đã gửi:</span>
+                                            <span className="value">
+                                                {cvLink ? (
+                                                    <a 
+                                                        href={cvLink} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="cv-link"
+                                                    >
+                                                        Xem hồ sơ
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-muted">Không tìm thấy file</span>
+                                                )}
+                                            </span>
+                                        </div>
                                     </div>
 
+                                    {/* --- FOOTER: Nút hành động --- */}
                                     <div className="app-card-footer">
                                         <button 
                                             className="btn-detail"
                                             onClick={() => navigate(`/jobs/${app.job_id || 1}`)}
                                         >
-                                            Xem lại tin
+                                            Xem lại tin tuyển dụng
                                         </button>
-                                        {/* Nếu trạng thái là ACCEPTED thì hiện nút liên hệ */}
                                         {app.status === 'ACCEPTED' && (
                                             <button className="btn-contact">Liên hệ HR</button>
                                         )}

@@ -1,0 +1,325 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap');
+
+/* --- 1. CẤU HÌNH LAYOUT CHUNG & FIX LỖI HEADER 70PX --- */
+.cv-preview-page {
+    background-color: #525659;
+    min-height: 100vh;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Quan trọng: Áp dụng box-sizing để tính toán kích thước cột chính xác */
+.cv-preview-page * {
+    box-sizing: border-box;
+}
+
+.preview-layout {
+    display: flex;
+    /* FIX LỖI HEADER: Trừ đi 70px chiều cao của Header web */
+    height: calc(100vh - 70px); 
+    overflow: hidden;
+    /* Nếu Header của bạn là fixed (đè lên), hãy mở comment dòng dưới: */
+    /* margin-top: 70px; */ 
+}
+
+/* Sidebar chọn mẫu */
+.template-sidebar {
+    width: 300px;
+    background: #fff;
+    border-right: 1px solid #ddd;
+    padding: 20px;
+    overflow-y: auto;
+    flex-shrink: 0;
+    padding-bottom: 80px; /* Tránh bị che bởi nút tải */
+}
+
+.btn-back {
+    display: flex; align-items: center; gap: 8px; background: none; border: none;
+    cursor: pointer; color: #555; font-weight: 500; margin-bottom: 20px;
+}
+.btn-back:hover { color: #000; }
+
+.template-list { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.t-card { cursor: pointer; text-align: center; border: 2px solid transparent; border-radius: 8px; padding: 5px; transition: all 0.2s; }
+.t-card:hover { background: #f5f5f5; }
+.t-card.active { border-color: #007bff; background: #e3f2fd; }
+.t-img { height: 80px; background: #ddd; margin-bottom: 8px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #666; }
+/* Màu demo cho các nút chọn mẫu */
+.modern-preview { background: #4e3b31; color: #fff; }
+.classic-preview { background: #fcf6f6; color: #333; border: 1px solid #ddd; }
+.minimal-preview { background: #fff; color: #000; border: 1px solid #000; }
+.vintage-preview { background: #383d41; color: #f0a500; }
+
+/* Khu vực hiển thị chính */
+.preview-main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #525659;
+    position: relative;
+}
+
+.cv-paper-container {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+    padding-bottom: 100px; /* Để chừa chỗ scroll không bị vướng bottom bar */
+}
+
+/* KHỔ GIẤY A4 */
+.cv-paper {
+    width: 210mm;
+    min-height: 297mm;
+    background: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    overflow: hidden; /* Tránh tràn lề làm vỡ layout */
+    /* Lưu ý: Không đặt display: flex ở đây nữa để tránh lỗi layout con */
+}
+
+/* BOTTOM BAR */
+.bottom-bar {
+    height: 60px;
+    background: white;
+    border-top: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+    gap: 20px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+.bar-colors { display: flex; align-items: center; gap: 10px; }
+.dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 1px #ddd; cursor: pointer; }
+.dot.active { box-shadow: 0 0 0 2px #000; transform: scale(1.1); }
+
+.btn-download {
+    background: #28a745; color: white; border: none; padding: 10px 20px;
+    border-radius: 5px; font-weight: bold; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; margin-left: auto;
+}
+.btn-download:hover { background: #218838; }
+
+/* General Styles */
+.rich-text-content ul { padding-left: 20px; margin: 5px 0; }
+.rich-text-content p { margin: 0 0 5px 0; }
+
+/* --- 2. CSS CHO MẪU HIỆN ĐẠI (MODERN) --- */
+/* Fix lỗi: Flex phải đặt ở layout con */
+.modern-layout { display: flex; flex-direction: row; min-height: 297mm; }
+
+.modern-sidebar { width: 35%; background-color: #4e3b31; color: white; padding: 40px 25px; flex-shrink: 0; text-align: left; }
+.modern-avatar-container { display: flex; justify-content: center; margin-bottom: 25px; }
+.modern-avatar, .modern-avatar-placeholder { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid rgba(255,255,255,0.3); }
+.modern-avatar-placeholder { background: rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center; font-size: 60px; color: white; }
+.modern-profile-info { text-align: center; margin-bottom: 30px; }
+.modern-name { font-size: 24px; font-weight: 700; margin: 0 0 5px 0; text-transform: uppercase; }
+.modern-job-title { font-size: 16px; font-weight: 400; opacity: 0.9; margin: 0; }
+.modern-contact-list { margin-bottom: 40px; font-size: 13px; line-height: 1.8; }
+.m-contact-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.m-icon { font-size: 14px; opacity: 0.8; width: 16px; text-align: center;}
+.modern-pill-header { background: rgba(255,255,255,0.9); padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; display: inline-block; margin-bottom: 15px; text-transform: uppercase; }
+.modern-sidebar-section { margin-bottom: 30px; }
+.m-sidebar-item { margin-bottom: 15px; }
+.m-degree { font-weight: bold; font-size: 14px; }
+.m-time-range { font-size: 12px; opacity: 0.8; font-style: italic; margin-bottom: 2px; }
+.m-school { font-size: 13px; font-weight: 500; }
+.m-skill-line { margin-bottom: 4px; font-size: 13px; }
+
+.modern-main { width: 65%; background: white; padding: 40px 30px; color: #333; }
+.modern-main-section { margin-bottom: 30px; }
+.modern-main-header { display: flex; align-items: center; margin-bottom: 15px; }
+.modern-header-pill { color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold; font-size: 15px; text-transform: uppercase; white-space: nowrap; }
+.modern-header-line { flex: 1; height: 1px; border-top: 2px solid; margin-left: 15px; }
+.modern-section-content { font-size: 14px; line-height: 1.6; padding-left: 5px; }
+.modern-exp-item { margin-bottom: 20px; }
+.m-exp-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.m-exp-title { font-weight: bold; font-size: 15px; color: #000; }
+.m-exp-date { font-weight: bold; font-size: 13px; color: #000; }
+.m-exp-company { font-weight: 500; font-size: 14px; color: #555; margin-bottom: 6px; font-style: italic; }
+
+/* --- 3. CSS CHO MẪU CỔ ĐIỂN (CLASSIC) --- */
+.classic-layout { display: flex; flex-direction: row; min-height: 297mm; }
+
+.classic-sidebar { width: 35%; background-color: #fcf6f6; padding: 40px 20px; border-right: 1px solid #eee; color: #333; }
+.classic-avatar-box { display: flex; justify-content: center; margin-bottom: 30px; }
+.classic-avatar, .classic-avatar-placeholder { width: 140px; height: 180px; object-fit: cover; border: 3px solid #e0c1c1; border-radius: 4px; }
+.classic-avatar-placeholder { background: #e0c1c1; color: white; font-size: 60px; display: flex; justify-content: center; align-items: center; }
+.classic-contact-list { margin-bottom: 40px; font-size: 13px; }
+.c-contact-row { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
+.c-icon-circle { width: 28px; height: 28px; border: 1px solid; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+.classic-sidebar-section { margin-bottom: 30px; }
+.classic-sidebar-header { background-color: #e6d3d3; padding: 8px 15px; font-weight: 700; color: #5d2e2e; text-transform: uppercase; font-size: 14px; margin-bottom: 15px; border-radius: 2px; }
+.c-sidebar-item { margin-bottom: 15px; font-size: 13px; line-height: 1.5; }
+.c-school { font-weight: bold; font-size: 14px; }
+.c-time { font-style: italic; color: #666; margin-bottom: 4px; }
+.c-degree { font-weight: 500; margin-bottom: 2px; }
+.c-skill-line { margin-bottom: 6px; font-weight: 500; font-size: 13px; }
+
+.classic-main { width: 65%; background: white; padding: 40px 30px; }
+.classic-main-header { margin-bottom: 30px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; }
+.classic-name { margin: 0 0 5px 0; font-size: 32px; font-weight: 700; }
+.classic-title { margin: 0; font-size: 18px; font-weight: 600; opacity: 0.9; }
+.classic-main-section { margin-bottom: 30px; }
+.classic-section-title { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 15px; }
+.classic-text-content { font-size: 14px; line-height: 1.6; color: #444; text-align: justify; }
+.classic-exp-item { margin-bottom: 20px; }
+.c-exp-header { font-size: 15px; font-weight: 700; color: #222; margin-bottom: 4px; }
+.c-exp-date { font-weight: 400; font-size: 14px; margin-left: 5px; color: #666; }
+.c-exp-title { font-size: 14px; font-style: italic; color: #555; margin-bottom: 8px; }
+.c-exp-desc { font-size: 14px; line-height: 1.5; color: #333; }
+
+/* --- 4. CSS CHO MẪU TỐI GIẢN (MINIMAL) --- */
+.minimal-layout { padding: 40px 50px; color: #000; display: block; min-height: 297mm; }
+.minimal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 20px; }
+.min-header-left { flex: 1; }
+.min-name { font-size: 32px; font-weight: 700; text-transform: uppercase; margin: 0 0 5px 0; }
+.min-title { font-size: 16px; font-weight: 500; margin: 0; opacity: 0.9; }
+.min-header-right { text-align: right; font-size: 13px; line-height: 1.6; }
+.min-contact-item { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.min-section-title { font-size: 16px; font-weight: 700; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; white-space: nowrap; }
+.min-section-title::after { content: ""; flex: 1; height: 1px; background: #ddd; margin-left: 15px; }
+.minimal-section { margin-bottom: 30px; }
+.min-intro-content { font-size: 14px; text-align: justify; line-height: 1.5; }
+.min-timeline-container { display: flex; flex-direction: column; }
+.min-timeline-item { display: flex; gap: 20px; }
+.min-tl-left { width: 150px; text-align: left; flex-shrink: 0; padding-top: 5px; }
+.min-company { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+.min-date { font-size: 13px; color: #444; }
+.min-tl-divider { width: 20px; position: relative; display: flex; justify-content: center; }
+.min-tl-dot { width: 10px; height: 10px; background: #000; border-radius: 50%; z-index: 2; margin-top: 8px; }
+.min-tl-line { position: absolute; top: 10px; bottom: -10px; width: 0; border-left: 2px dotted #000; z-index: 1; }
+.min-timeline-item:last-child .min-tl-line { display: none; }
+.min-tl-right { flex: 1; padding-bottom: 25px; }
+.min-job-title { font-weight: 700; font-size: 15px; margin-bottom: 8px; padding-top: 5px; }
+.min-desc { font-size: 14px; line-height: 1.5; }
+.min-bottom-grid { display: flex; gap: 40px; border-top: 2px solid #ddd; padding-top: 30px; }
+.min-col { flex: 1; }
+.min-edu-item { margin-bottom: 15px; font-size: 14px; }
+.min-time-sm, .min-school { font-weight: 500; margin-bottom: 2px; }
+.min-degree { font-style: italic; color: #333; }
+.min-skill-row { margin-bottom: 10px; font-size: 14px; }
+
+/* --- 5. CSS CHO MẪU ẤN TƯỢNG (IMPRESSIVE/VINTAGE) --- */
+.impressive-layout { display: flex; flex-direction: row; min-height: 297mm; }
+
+.vintage-main { width: 63%; background-color: #fffdf5; padding: 40px 30px; color: #333; }
+.vin-section { margin-bottom: 30px; }
+.vin-header { display: flex; align-items: center; border-bottom: 2px solid; padding-bottom: 10px; margin-bottom: 20px; }
+.vin-icon-box { width: 32px; height: 32px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 15px; }
+.vin-title { font-size: 18px; font-weight: 700; text-transform: uppercase; margin: 0; }
+.vin-content { font-size: 14px; line-height: 1.6; text-align: justify; }
+.vin-item { margin-bottom: 20px; }
+.vin-item-top { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.vin-school, .vin-company { font-weight: 700; font-size: 15px; text-transform: uppercase; }
+.vin-date { font-size: 13px; font-weight: 600; color: #555; }
+.vin-degree, .vin-job-title { font-weight: 700; font-size: 14px; margin-bottom: 5px; color: #333; }
+.vin-desc { font-size: 14px; line-height: 1.5; color: #444; }
+
+.vintage-sidebar { width: 37%; background-color: #383d41; color: white; padding: 40px 25px; display: flex; flex-direction: column; }
+.vin-profile-header { text-align: right; margin-bottom: 20px; }
+.vin-name { margin: 0; font-size: 26px; font-weight: 700; text-transform: uppercase; color: #fff; letter-spacing: 1px; }
+.vin-job { margin: 5px 0 0; font-size: 15px; font-weight: 400; color: #ccc; }
+.vin-avatar-box { display: flex; justify-content: center; margin-bottom: 30px; }
+.vin-avatar, .vin-avatar-placeholder { width: 150px; height: 150px; border-radius: 50%; border: 5px solid rgba(255,255,255,0.1); object-fit: cover; }
+.vin-avatar-placeholder { background: #555; color: white; font-size: 60px; display: flex; align-items: center; justify-content: center; }
+.vin-contact-list { margin-bottom: 40px; font-size: 13px; }
+.vin-contact-row { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
+.vin-icon { width: 20px; text-align: center; }
+.vin-sidebar-section { margin-bottom: 30px; }
+.vin-sidebar-title { font-size: 16px; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #555; padding-bottom: 8px; margin-bottom: 15px; color: #fff; display: flex; align-items: center; }
+.vin-skill-list { font-size: 13px; }
+.vin-skill-item { margin-bottom: 12px; }
+.vin-skill-name { margin-bottom: 4px; }
+.vin-progress-bar { height: 6px; background: #555; border-radius: 3px; overflow: hidden; }
+.vin-progress-fill { height: 100%; }
+.vin-side-text { font-size: 13px; margin-bottom: 10px; line-height: 1.4; color: #ddd; }
+
+/* --- CẤU HÌNH IN ẤN (PRINT SETTINGS) - ĐÃ FIX LỖI THỪA TRANG --- */
+@media print {
+    /* 1. THIẾT LẬP KHỔ GIẤY & XÓA LỀ TRÌNH DUYỆT */
+    @page {
+        margin: 0 !important; /* Xóa lề trắng mặc định */
+        size: A4 portrait;    /* Ép khổ A4 dọc */
+    }
+
+    /* 2. CẤU HÌNH BODY ĐỂ KHÔNG BỊ CUỘN */
+    html, body {
+        width: 210mm !important;
+        height: 297mm !important; /* Cố định chiều cao đúng bằng A4 */
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important; /* Ẩn thanh cuộn thừa */
+        background: white;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 3. ẨN GIAO DIỆN THỪA (Dùng visibility để không phá vỡ DOM React) */
+    body * {
+        visibility: hidden;
+    }
+
+    /* 4. HIỂN THỊ LẠI VÙNG CV */
+    .cv-preview-page, 
+    .cv-preview-page * {
+        visibility: visible;
+    }
+
+    /* 5. CĂN CHỈNH VỊ TRÍ CHÍNH XÁC */
+    .cv-preview-page {
+        position: fixed !important; /* Dùng fixed để ghim chặt vào góc */
+        left: 0 !important;
+        top: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 9999;
+        background: white;
+    }
+
+    /* 6. RESET CÁC CONTAINER CON */
+    .preview-layout, 
+    .preview-main-area, 
+    .cv-paper-container {
+        position: static !important;
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important; /* Cắt bỏ phần thừa nếu có */
+        background: white !important;
+        display: block !important;
+    }
+
+    /* 7. CẤU HÌNH TỜ GIẤY CV */
+    .cv-paper {
+        width: 100% !important;
+        min-height: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important; /* Nếu mẫu có padding riêng thì CSS mẫu sẽ ghi đè, dòng này để an toàn */
+        
+        /* FIX QUAN TRỌNG: Ngăn nhảy trang */
+        page-break-after: avoid !important;
+        page-break-before: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* ẨN CÁC NÚT BẤM */
+    .no-print, 
+    .template-sidebar, 
+    .bottom-bar, 
+    .btn-back,
+    header, nav { 
+        display: none !important; 
+    }
+}

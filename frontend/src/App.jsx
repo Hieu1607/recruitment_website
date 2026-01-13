@@ -13,14 +13,16 @@ import Register from './pages/Register';
 import JobDetail from './pages/JobDetail';
 import Profile from './pages/Profile';
 import CompanyList from './pages/CompanyList';
-import AppliedJobs from './pages/AppliedJobs'; // <--- MỚI THÊM: Import trang đã ứng tuyển
+import AppliedJobs from './pages/AppliedJobs'; 
+import CVBuilder from './pages/CVBuilder'; 
+import CVPreview from './pages/CVPreview'; // <--- 1. MỚI: Import trang Preview
 
 function App() {
   const { isAuthenticated, user, logout } = useAuth();
 
   return (
     <BrowserRouter>
-      {/* Header luôn hiển thị, truyền props cần thiết */}
+      {/* Header luôn hiển thị */}
       <Header isAuthenticated={isAuthenticated} user={user} logout={logout} />
 
       <Routes>
@@ -29,7 +31,7 @@ function App() {
         <Route path="/companies" element={<CompanyList />} />
         <Route path="/jobs/:id" element={<JobDetail />} />
 
-        {/* Trang Login/Register: Nếu đã đăng nhập thì đá về Home */}
+        {/* Trang Login/Register */}
         <Route 
           path="/login" 
           element={isAuthenticated ? <Navigate to="/" /> : <Login />} 
@@ -41,25 +43,29 @@ function App() {
 
         {/* ================= KHU VỰC ĐĂNG NHẬP (PROTECTED) ================= */}
         
-        {/* 1. Chung cho tất cả User đã đăng nhập (Admin, Employer, JobSeeker) */}
+        {/* 1. Chung cho tất cả User đã đăng nhập */}
         <Route element={<PrivateRoute allowedRoles={[ROLE_ID.EMPLOYER, ROLE_ID.JOB_SEEKER, ROLE_ID.ADMIN]} />}>
           <Route path="/profile" element={<Profile />} />
         </Route>
 
-        {/* 2. Dành riêng cho NHÀ TUYỂN DỤNG (Employer) */}
+        {/* 2. Dành riêng cho NHÀ TUYỂN DỤNG */}
         <Route element={<PrivateRoute allowedRoles={[ROLE_ID.EMPLOYER]} />}>
-          {/* Ví dụ: Trang đăng tin, quản lý CV ứng viên */}
-          <Route path="/post-job" element={<div>Trang Đăng Tin Tuyển Dụng (Đang phát triển)</div>} />
-          <Route path="/manage-candidates" element={<div>Trang Quản Lý Ứng Viên (Đang phát triển)</div>} />
+          <Route path="/post-job" element={<div>Trang Đăng Tin Tuyển Dụng</div>} />
+          <Route path="/manage-candidates" element={<div>Trang Quản Lý Ứng Viên</div>} />
         </Route>
 
-        {/* 3. Dành riêng cho ỨNG VIÊN (Job Seeker) */}
+        {/* 3. Dành riêng cho ỨNG VIÊN */}
         <Route element={<PrivateRoute allowedRoles={[ROLE_ID.JOB_SEEKER]} />}>
-          {/* Trang xem lịch sử ứng tuyển */}
           <Route path="/applied-jobs" element={<AppliedJobs />} />
+          
+          {/* Trang Tạo CV */}
+          <Route path="/create-cv" element={<CVBuilder />} />
+          
+          {/* Trang Xem và Tải CV - MỚI THÊM */}
+          <Route path="/preview" element={<CVPreview />} />
         </Route>
 
-        {/* Route 404 (Nếu nhập linh tinh) */}
+        {/* Route 404 */}
         <Route path="*" element={<div style={{textAlign: 'center', marginTop: '50px'}}>404 - Không tìm thấy trang</div>} />
 
       </Routes>
