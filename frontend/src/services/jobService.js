@@ -24,7 +24,7 @@ const mapJobData = (apiJob) => {
 const jobService = {
   
   /* ========================================================================
-     PHẦN 1: CANDIDATE (ỨNG VIÊN) & PUBLIC - GIỮ NGUYÊN CODE CŨ
+     PHẦN 1: CANDIDATE (ỨNG VIÊN) & PUBLIC
      ======================================================================== */
 
   getJobs: async (keyword = '', location = 'all') => {
@@ -103,7 +103,7 @@ const jobService = {
   },
 
   /* ========================================================================
-     PHẦN 2: EMPLOYER (NHÀ TUYỂN DỤNG) - TÍCH HỢP MỚI VÀO ĐÂY
+     PHẦN 2: EMPLOYER (NHÀ TUYỂN DỤNG)
      ======================================================================== */
 
   // 1. Tạo tin tuyển dụng mới
@@ -124,7 +124,7 @@ const jobService = {
     return response.data;
   },
 
-  // 4. Lấy danh sách việc làm CỦA CÔNG TY (Có filter company_id)
+  // 4. Lấy danh sách việc làm CỦA CÔNG TY (Có filter company_id) - Dùng cho Dashboard
   getMyCompanyJobs: async (companyId, page = 1, limit = 100) => {
     try {
         const params = { 
@@ -134,7 +134,6 @@ const jobService = {
         };
         const response = await api.get('/v1/jobs', { params });
         
-        // Map lại dữ liệu cho giống cấu trúc getJobs để tiện hiển thị
         const rawJobs = response.data.data || [];
         const jobs = Array.isArray(rawJobs) ? rawJobs.map(mapJobData) : [];
         
@@ -149,19 +148,13 @@ const jobService = {
   },
 
   /* ========================================================================
-     PHẦN 3: QUẢN LÝ ỨNG VIÊN (VIEW & APPROVE APPLICANTS)
+     PHẦN 3: QUẢN LÝ ỨNG VIÊN
      ======================================================================== */
 
-  // 5. Lấy danh sách người đã nộp đơn vào 1 Job cụ thể
-  // --- ĐÃ SỬA LẠI ĐƯỜNG DẪN API CHO ĐÚNG VỚI BACKEND ---
+  // 5. Lấy danh sách người đã nộp đơn
   getJobApplicants: async (jobId) => {
     try {
-        // Cũ (Sai): /v1/jobs/${jobId}/applications
-        // Mới (Đúng): /v1/applications/job/${jobId}
         const response = await api.get(`/v1/applications/job/${jobId}`);
-        
-        // Theo controller của bạn: return successResponse(res, 200, result.applications, ...)
-        // successResponse thường gói data vào trong property 'data'.
         return response.data.data || response.data || [];
     } catch (error) {
         console.error("Lỗi lấy ứng viên:", error);
@@ -169,11 +162,32 @@ const jobService = {
     }
   },
 
-  // 6. Cập nhật trạng thái ứng viên (Duyệt/Từ chối)
+  // 6. Cập nhật trạng thái ứng viên
   updateApplicationStatus: async (applicationId, status) => {
-    // status: 'accepted', 'rejected', 'reviewing'...
     const response = await api.put(`/v1/applications/${applicationId}`, { status });
     return response.data;
+  },
+
+  /* ========================================================================
+     PHẦN 4: PUBLIC - VIEW COMPANY JOBS
+     ======================================================================== */
+
+  // 7. [MỚI] Lấy danh sách việc làm theo ID công ty (Dùng cho trang Chi tiết công ty)
+  getJobsByCompanyId: async (companyId) => {
+    try {
+      const response = await api.get('/v1/jobs', { 
+        params: { 
+            company_id: companyId,
+            limit: 50 // Giới hạn lấy 50 job hiển thị
+        } 
+      });
+      const rawJobs = response.data.data || response.data || [];
+      // Tái sử dụng mapJobData để đảm bảo dữ liệu chuẩn
+      return Array.isArray(rawJobs) ? rawJobs.map(mapJobData) : [];
+    } catch (error) {
+      console.error("Lỗi lấy job theo company:", error);
+      return [];
+    }
   }
 };
 

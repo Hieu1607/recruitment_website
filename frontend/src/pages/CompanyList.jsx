@@ -1,11 +1,13 @@
 // src/pages/CompanyList.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // [MỚI] 1. Import useNavigate
 import companyService from '../services/companyService';
 import '../css/CompanyList.css'; 
 
 const BASE_API_URL = 'http://localhost:5000'; 
 
 const CompanyList = () => {
+    const navigate = useNavigate(); // [MỚI] 2. Khai báo hook chuyển trang
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -81,12 +83,12 @@ const CompanyList = () => {
                                         />
                                     </div>
 
-                                    {/* INFO - ĐÃ THÊM LẠI TYPE VÀ DESCRIPTION */}
+                                    {/* INFO */}
                                     <div className="company-info">
                                         <h3 className="company-name">{comp.name}</h3>
                                         
                                         <div className="company-meta">
-                                            {/* Loại hình công ty (nếu có) */}
+                                            {/* Loại hình công ty */}
                                             {comp.type && (
                                                 <span className="meta-badge" style={{background:'#e6f7ef', color:'#00b14f', border:'1px solid #d1fae5'}}>
                                                     🏢 {comp.type}
@@ -98,7 +100,7 @@ const CompanyList = () => {
                                                 👥 {comp.size || 'N/A'}
                                             </span>
 
-                                            {/* Địa chỉ (Chỉ lấy tỉnh/thành phố đầu tiên cho gọn) */}
+                                            {/* Địa chỉ */}
                                             {comp.address && (
                                                 <span className="meta-badge">
                                                     📍 {comp.address.split(',')[0]}
@@ -111,14 +113,20 @@ const CompanyList = () => {
                                             fontSize:'13px', color:'#666', lineHeight:'1.5',
                                             margin:'10px 0',
                                             display: '-webkit-box',
-                                            WebkitLineClamp: '2', // Giới hạn 2 dòng
+                                            WebkitLineClamp: '2', 
                                             WebkitBoxOrient: 'vertical',
                                             overflow: 'hidden'
                                         }}>
                                             {comp.description || 'Chưa có mô tả giới thiệu về công ty này.'}
                                         </p>
 
-                                        <button className="btn-view-detail">Xem chi tiết</button>
+                                        {/* [MỚI] 3. Thêm sự kiện onClick để chuyển trang */}
+                                        <button 
+                                            className="btn-view-detail"
+                                            onClick={() => navigate(`/companies/${comp.id}`)}
+                                        >
+                                            Xem chi tiết
+                                        </button>
                                     </div>
                                 </div>
                             ))}
