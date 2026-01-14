@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { getMyProfile, updateMyProfile } from '../services/profileService';
+import { 
+    getMyProfile, 
+    updateMyProfile, 
+    getMyCompany, 
+    createCompanyProfile, // Đảm bảo bạn đã thêm hàm này trong profileService.js
+    updateCompanyProfile 
+} from '../services/profileService';
+import { ROLE_ID } from '../utils/roles';
 import '../css/profile.css';
 
 /* ================= UTIL ================= */
@@ -14,25 +21,55 @@ const getFileName = (url) => {
 };
 
 const Profile = () => {
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState(null);
+  
+  // State Ứng viên
+  const [profile, setProfile] = useState(null); 
+  
+  // State Công ty
+  const [company, setCompany] = useState(null); 
+  const [companyId, setCompanyId] = useState(null); // Để check xem là Tạo mới hay Cập nhật
 
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+
+  // Form Data (Dùng chung cho cả 2 role khi edit)
   const [editData, setEditData] = useState({});
+  
+  // State riêng cho Ứng viên (File)
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState('');
   const [cvFiles, setCvFiles] = useState([]);
 
-  /* ================= FETCH ================= */
+  /* ================= FETCH DATA ================= */
   useEffect(() => {
-    fetchData();
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    if (storedUser) {
+        setUserRole(storedUser.role_id);
+        fetchData(storedUser.role_id);
+    } else {
+        setLoading(false);
+    }
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (roleId) => {
     try {
-      const data = await getMyProfile();
-      setProfile(data);
-      setAvatarPreview(data?.avatar_url || 'https://via.placeholder.com/150');
+      if (roleId === ROLE_ID.EMPLOYER) {
+          // --- LOGIC NHÀ TUYỂN DỤNG ---
+          const data = await getMyCompany();
+          if (data) {
+              setCompany(data);
+              setCompanyId(data.id); // Lưu ID để dùng cho lệnh PUT
+          } else {
+              setCompany({}); // Chưa có công ty
+              setCompanyId(null); // Null nghĩa là sẽ dùng lệnh POST
+          }
+      } else {
+          // --- LOGIC ỨNG VIÊN ---
+          const data = await getMyProfile();
+          setProfile(data);
+          setAvatarPreview(data?.avatar_url || 'https://via.placeholder.com/150');
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -42,15 +79,28 @@ const Profile = () => {
 
   /* ================= HANDLERS ================= */
   const handleEditClick = () => {
-    setEditData({
-      full_name: profile.full_name || '',
-      phone: profile.phone || '',
-      address: profile.address || '',
-      dob: profile.dob || '',
-      education: profile.education || '',
-      experience: profile.experience || '',
-      skills: profile.skills || '',
-    });
+    if (userRole === ROLE_ID.EMPLOYER) {
+        // Load data công ty vào form
+        setEditData({
+            name: company?.name || '',
+            website: company?.website || '',
+            phone: company?.phone || '', // Lưu ý: API cần trả về phone nếu muốn hiện
+            address: company?.address || '',
+            size: company?.size || '1-10', // Default size theo API doc
+            description: company?.description || ''
+        });
+    } else {
+        // Load data ứng viên
+        setEditData({
+            full_name: profile?.full_name || '',
+            phone: profile?.phone || '',
+            address: profile?.address || '',
+            dob: profile?.dob || '',
+            education: profile?.education || '',
+            experience: profile?.experience || '',
+            skills: profile?.skills || '',
+        });
+    }
     setIsEditing(true);
   };
 
@@ -58,7 +108,7 @@ const Profile = () => {
     setIsEditing(false);
     setAvatarFile(null);
     setCvFiles([]);
-    setAvatarPreview(profile.avatar_url || 'https://via.placeholder.com/150');
+    if (profile) setAvatarPreview(profile.avatar_url || 'https://via.placeholder.com/150');
   };
 
   const handleChange = (e) => {
@@ -76,55 +126,156 @@ const Profile = () => {
 
   const handleCvChange = (e) => {
     const files = Array.from(e.target.files);
-    const currentCount = profile?.cv_url?.length || 0;
-
-    if (files.length + currentCount > 5) {
+    if ((profile?.cv_url?.length || 0) + files.length > 5) {
       alert('Chỉ được tối đa 5 CV');
       return;
     }
     setCvFiles(files);
   };
 
+  // --- HÀM LƯU QUAN TRỌNG ĐÃ SỬA ---
   const handleSave = async () => {
     setLoading(true);
     try {
-      const formData = new FormData();
+      if (userRole === ROLE_ID.EMPLOYER) {
+          // === LOGIC CHO CÔNG TY (Theo đúng API Doc) ===
+          let updatedCompany;
+          
+          if (companyId) {
+              // CASE 1: Đã có ID -> Gọi PUT /companies/:id
+              updatedCompany = await updateCompanyProfile(companyId, editData);
+              alert('Cập nhật thông tin công ty thành công!');
+          } else {
+              // CASE 2: Chưa có ID -> Gọi POST /companies
+              updatedCompany = await createCompanyProfile(editData);
+              setCompanyId(updatedCompany.id); // Cập nhật ID mới tạo
+              alert('Tạo hồ sơ công ty thành công!');
+          }
+          
+          setCompany(updatedCompany);
 
-      Object.entries(editData).forEach(([key, value]) => {
-        if (value !== '') formData.append(key, value);
-      });
+      } else {
+          // === LOGIC CHO ỨNG VIÊN (Giữ nguyên) ===
+          const formData = new FormData();
+          Object.entries(editData).forEach(([key, value]) => {
+            if (value) formData.append(key, value);
+          });
+          if (avatarFile) formData.append('avatar', avatarFile);
+          cvFiles.forEach((file) => formData.append('cv', file));
 
-      if (avatarFile) formData.append('avatar', avatarFile);
-      cvFiles.forEach((file) => formData.append('cv', file));
-
-      const updated = await updateMyProfile(formData);
-
-      setProfile(updated);
-      setAvatarPreview(updated.avatar_url || avatarPreview);
+          const updated = await updateMyProfile(formData);
+          setProfile(updated);
+          setAvatarPreview(updated.avatar_url || avatarPreview);
+          window.dispatchEvent(new Event('profileUpdated'));
+          alert('Cập nhật hồ sơ thành công!');
+      }
+      
       setIsEditing(false);
       setAvatarFile(null);
       setCvFiles([]);
 
-      window.dispatchEvent(new Event('profileUpdated'));
-      alert('Cập nhật hồ sơ thành công!');
     } catch (err) {
       console.error(err);
-      alert('Lỗi khi cập nhật hồ sơ');
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Lỗi khi lưu dữ liệu';
+      alert(`Lỗi: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // ... (Giữ nguyên phần import và logic phía trên)
-
   /* ================= RENDER ================= */
-  if (loading && !profile) return <div className="profile-loading">Đang tải...</div>;
+  if (loading) return <div className="profile-loading">Đang tải...</div>;
+
+  // --- VIEW: NHÀ TUYỂN DỤNG ---
+  if (userRole === ROLE_ID.EMPLOYER) {
+      return (
+        <div className="profile-container">
+            <div className="profile-card">
+                <div style={{width: '100%', padding: '20px'}}>
+                    <h2 style={{borderBottom: '2px solid #00b14f', paddingBottom: '10px', marginBottom: '20px'}}>
+                        Thông tin doanh nghiệp
+                    </h2>
+                    
+                    {!isEditing ? (
+                        <div>
+                            {/* Nếu chưa có công ty thì hiện thông báo */}
+                            {!companyId ? (
+                                <div style={{textAlign:'center', color: '#666', margin: '30px 0'}}>
+                                    <p>Bạn chưa cập nhật hồ sơ công ty.</p>
+                                    <button className="btn btn-edit-profile" onClick={handleEditClick}>
+                                        ➕ Tạo hồ sơ công ty ngay
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <h3>{company.name}</h3>
+                                    <p><strong>Website:</strong> <a href={company.website} target="_blank" rel="noreferrer">{company.website || '---'}</a></p>
+                                    <p><strong>Quy mô:</strong> {company.size} nhân viên</p>
+                                    <p><strong>Địa chỉ:</strong> {company.address || '---'}</p>
+                                    <hr/>
+                                    <h5>Giới thiệu:</h5>
+                                    <p style={{whiteSpace: 'pre-line'}}>{company.description || 'Chưa có mô tả'}</p>
+                                    
+                                    <button className="btn btn-edit-profile" onClick={handleEditClick} style={{marginTop: '20px'}}>
+                                        ✏️ Chỉnh sửa thông tin
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    ) : (
+                        // Form Edit cho Company
+                        <div className="employer-form">
+                            <div className="form-group mb-3">
+                                <label>Tên công ty <span className="text-danger">*</span></label>
+                                <input className="edit-input" name="name" value={editData.name} onChange={handleChange} placeholder="Nhập tên công ty..." />
+                            </div>
+                            <div className="row">
+                                <div className="col-md-6 form-group mb-3">
+                                    <label>Website</label>
+                                    <input className="edit-input" name="website" value={editData.website} onChange={handleChange} placeholder="https://..." />
+                                </div>
+                                <div className="col-md-6 form-group mb-3">
+                                    <label>Quy mô</label>
+                                    <select className="edit-input" name="size" value={editData.size} onChange={handleChange} style={{width:'100%', padding:'10px'}}>
+                                        <option value="1-10">1-10</option>
+                                        <option value="11-50">11-50</option>
+                                        <option value="51-200">51-200</option>
+                                        <option value="201-500">201-500</option>
+                                        <option value="501-1000">501-1000</option>
+                                        <option value="1001-5000">1001-5000</option>
+                                        <option value="5000+">5000+</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="form-group mb-3">
+                                <label>Địa chỉ</label>
+                                <input className="edit-input" name="address" value={editData.address} onChange={handleChange} />
+                            </div>
+                            <div className="form-group mb-3">
+                                <label>Giới thiệu công ty</label>
+                                <textarea className="edit-textarea" rows="5" name="description" value={editData.description} onChange={handleChange}></textarea>
+                            </div>
+
+                            <div className="action-buttons">
+                                <button className="btn btn-save" onClick={handleSave}>
+                                    {companyId ? 'Lưu thay đổi' : 'Tạo mới'}
+                                </button>
+                                <button className="btn btn-cancel" onClick={handleCancel}>Hủy</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+      );
+  }
+
+  // --- VIEW: ỨNG VIÊN (FULL CODE) ---
   if (!profile) return <div className="profile-error">Không có dữ liệu hồ sơ</div>;
 
   return (
     <div className="profile-container">
       <div className="profile-card">
-        
         {/* ===== CỘT TRÁI: AVATAR & THÔNG TIN CÁ NHÂN ===== */}
         <div className="profile-sidebar">
           <div className="avatar-wrapper">
@@ -160,7 +311,7 @@ const Profile = () => {
 
           <hr className="divider" />
 
-          {/* THÔNG TIN LIÊN HỆ (Phone, DOB, Address) */}
+          {/* THÔNG TIN LIÊN HỆ */}
           <div className="contact-info">
             <div className="info-item">
               <span className="info-icon">📞</span>
@@ -278,7 +429,6 @@ const Profile = () => {
                     📂 Chọn file CV (Tối đa 5)
                 </label>
                 
-                {/* Preview file mới chọn */}
                 {cvFiles.length > 0 && (
                   <ul className="cv-preview-list">
                     {cvFiles.map((file, i) => (
@@ -289,7 +439,6 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Danh sách CV hiện có */}
             {profile.cv_url?.length > 0 ? (
               <ul className="cv-list">
                 {profile.cv_url.map((cv, i) => (

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMyProfile } from '../services/profileService';
-import '../css/header.css';
+// --- SỬA LẠI ĐƯỜNG DẪN IMPORT (Chỉ dùng ../) ---
+import { getMyProfile } from '../services/profileService'; 
+import { ROLE_ID } from '../utils/roles'; 
+// ------------------------------------------------
+import '../css/header.css'; 
 
 const Header = ({ isAuthenticated, user, logout }) => {
   const navigate = useNavigate();
@@ -38,30 +41,62 @@ const Header = ({ isAuthenticated, user, logout }) => {
   };
 
   // --- LOGIC HIỂN THỊ THÔNG TIN ---
-  const displayName = userProfile?.full_name || user?.full_name || 'User';
+  const displayName = userProfile?.full_name || user?.fullName || user?.full_name || 'User'; 
   const displayAvatar = userProfile?.avatar_url || 'https://placehold.co/150';
+
+  // Kiểm tra quyền
+  const isEmployer = user?.role_id === ROLE_ID.EMPLOYER;
 
   return (
     <header className="header-container">
       <div className="header-left">
         <div className="logo" onClick={() => navigate('/')}>JobCV</div>
+        
         <nav className="nav-menu">
-          <span className="nav-item" onClick={() => navigate('/')}>Việc làm</span>
-          
-          {/* ĐÃ SỬA: Thêm sự kiện onClick để chuyển trang */}
-          <span className="nav-item" onClick={() => navigate('/create-cv')}>Tạo CV</span>
-          
-          <span className="nav-item" onClick={() => navigate('/companies')}>Công ty</span>
+          {/* MENU DÀNH CHO NHÀ TUYỂN DỤNG */}
+          {isAuthenticated && isEmployer ? (
+            <>
+              <span className="nav-item" onClick={() => navigate('/employer/company')}>
+                Công ty của tôi
+              </span>
+              <span className="nav-item" onClick={() => navigate('/employer/jobs')}>
+                Quản lý tin tuyển dụng
+              </span>
+              <span className="nav-item" onClick={() => navigate('/employer/candidates')}>
+                Tìm hồ sơ
+              </span>
+            </>
+          ) : (
+            /* MENU DÀNH CHO ỨNG VIÊN HOẶC KHÁCH */
+            <>
+              <span className="nav-item" onClick={() => navigate('/')}>Việc làm</span>
+              <span className="nav-item" onClick={() => navigate('/create-cv')}>Tạo CV</span>
+              <span className="nav-item" onClick={() => navigate('/companies')}>Công ty</span>
+            </>
+          )}
         </nav>
       </div>
 
       <div className="header-right">
         {isAuthenticated ? (
           <div className="authenticated-actions">
-            <span className="applied-jobs-link" onClick={() => navigate('/applied-jobs')}>
-              Vị trí đã ứng tuyển
-            </span>
+            
+            {/* ACTION RIÊNG */}
+            {isEmployer ? (
+                 <button 
+                    className="btn btn-employer" 
+                    style={{marginRight: '15px', padding: '8px 15px', fontSize: '14px'}}
+                    onClick={() => navigate('/employer/post-job')}
+                 >
+                    + Đăng tin mới
+                 </button>
+            ) : (
+                <span className="applied-jobs-link" onClick={() => navigate('/applied-jobs')}>
+                    Vị trí đã ứng tuyển
+                </span>
+            )}
 
+            {/* AVATAR & USER INFO */}
             <div className="user-info-area" onClick={() => navigate('/profile')}>
               <img
                 src={displayAvatar}
@@ -80,6 +115,7 @@ const Header = ({ isAuthenticated, user, logout }) => {
             </button>
           </div>
         ) : (
+          /* CHƯA ĐĂNG NHẬP */
           <>
             <button className="btn btn-login" onClick={() => navigate('/login')}>
               Đăng nhập
@@ -87,13 +123,10 @@ const Header = ({ isAuthenticated, user, logout }) => {
             <button className="btn btn-register" onClick={() => navigate('/register')}>
               Đăng ký
             </button>
+            <button className="btn btn-employer" onClick={() => navigate('/register')}>
+                Đăng tuyển & tìm hồ sơ
+            </button>
           </>
-        )}
-
-        {!isAuthenticated && (
-          <button className="btn btn-employer">
-            Đăng tuyển & tìm hồ sơ
-          </button>
         )}
       </div>
     </header>

@@ -1,7 +1,6 @@
 import api from './api';
+import { ROLE_ID } from '../utils/roles'; // Import để so sánh chính xác
 
-// Vì api.js có baseURL là ".../api", nên ở đây ta thêm "/v1/public"
-// Kết quả gọi sẽ là: http://localhost:5000/api/v1/public/login
 const AUTH_URL = '/v1/public'; 
 
 const login = async (email, password) => {
@@ -11,19 +10,14 @@ const login = async (email, password) => {
             password,
         });
         
-        // --- ĐOẠN QUAN TRỌNG CẦN SỬA ĐÂY ---
-        const data = response.data?.data || response.data; // Lấy cục data trả về
+        const data = response.data?.data || response.data;
         
-        // 1. Tìm accessToken từ data trả về
+        // Lưu token và user info
         const accessToken = data.accessToken || data.token;
-
-        // 2. Lưu token ra riêng với tên key là "token" để api.js đọc được
         if (accessToken) {
             localStorage.setItem('token', accessToken); 
         }
-
-        // 3. Vẫn lưu thông tin user để hiển thị lên Header (Avatar, Tên...)
-        localStorage.setItem('user', JSON.stringify(data));
+        localStorage.setItem('user', JSON.stringify(data.user || data));
 
         return response.data;
     } catch (error) {
@@ -31,14 +25,27 @@ const login = async (email, password) => {
     }
 };
 
-const register = async (email, password, fullName, role_id) => {
+const register = async (email, password, fullName, role_id, companyData = null) => {
     try {
-        const res = await api.post(`${AUTH_URL}/register`, { 
+        // --- SỬA ĐOẠN NÀY ---
+        // Chuyển đổi role_id (số) thành roleName (chữ) để Backend hiểu
+        let roleName = 'jobseeker'; // Mặc định
+        if (role_id === ROLE_ID.EMPLOYER) {
+            roleName = 'employer';
+        } else if (role_id === ROLE_ID.ADMIN) {
+            roleName = 'admin';
+        }
+
+        const payload = { 
             email, 
             password, 
             fullName, 
-            role_id 
-        });
+            roleName: roleName, // Gửi đúng cái Backend cần
+            // Các trường phụ trợ khác
+            company: companyData 
+        };
+
+        const res = await api.post(`${AUTH_URL}/register`, payload);
         return res.data?.data || res.data;
     } catch (error) {
         throw error;
@@ -46,7 +53,6 @@ const register = async (email, password, fullName, role_id) => {
 };
 
 const logout = () => {
-    // Xóa cả 2 key khi logout
     localStorage.removeItem('token');
     localStorage.removeItem('user');
 };
