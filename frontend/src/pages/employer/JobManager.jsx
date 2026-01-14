@@ -36,7 +36,7 @@ const JobManager = () => {
     fetchMyJobs();
   }, [navigate]);
 
-  /* ====== CHỈ THÊM HÀM NÀY ====== */
+  /* ================= LOAD PROFILES ================= */
   const loadApplicantsWithName = async (apps) => {
     const result = await Promise.all(
       apps.map(async (app) => {
@@ -58,12 +58,12 @@ const JobManager = () => {
     setApplicants(result);
   };
 
-  /* ====== CHỈ SỬA HÀM NÀY ====== */
+  /* ================= VIEW APPLICANTS ================= */
   const handleViewApplicants = async (job) => {
     setLoading(true);
     try {
       const apps = await jobService.getJobApplicants(job.id);
-      await loadApplicantsWithName(apps);   // 👈 thêm dòng này
+      await loadApplicantsWithName(apps);
       setSelectedJob(job);
     } catch (error) {
       alert('Lỗi tải ứng viên');
@@ -74,29 +74,43 @@ const JobManager = () => {
 
   /* ================= UPDATE STATUS ================= */
   const handleUpdateStatus = async (appId, newStatus) => {
-    if (!window.confirm(`Xác nhận chuyển trạng thái thành: ${newStatus}?`)) return;
+    // Hiển thị tên trạng thái tiếng Việt trong confirm cho dễ hiểu
+    const statusText = newStatus === 'offered' ? 'ĐÃ NHẬN (Offered)' : 'TỪ CHỐI (Rejected)';
+    
+    if (!window.confirm(`Xác nhận chuyển trạng thái thành: ${statusText}?`)) return;
 
     try {
+      // Gọi API với đúng từ khóa: 'offered' hoặc 'rejected'
       await jobService.updateApplicationStatus(appId, newStatus);
+      
       setApplicants((prev) =>
         prev.map((app) =>
           app.id === appId ? { ...app, status: newStatus } : app
         )
       );
     } catch (error) {
-      alert('Lỗi cập nhật trạng thái');
+      console.error('Lỗi API:', error);
+      alert('Lỗi cập nhật trạng thái. Vui lòng kiểm tra lại!');
     }
   };
 
   // Helpers
   const formatDate = (d) => (d ? new Date(d).toLocaleDateString('vi-VN') : '---');
 
+  // Cập nhật hàm này để khớp với API docs: offered, interview_scheduled, rejected...
   const renderStatus = (st) => {
-    if (st === 'accepted')
-      return <span className="status-badge status-accepted">Đã nhận</span>;
-    if (st === 'rejected')
-      return <span className="status-badge status-rejected">Từ chối</span>;
-    return <span className="status-badge status-pending">Chờ duyệt</span>;
+    switch (st) {
+      case 'offered': // Thay vì accepted
+        return <span className="status-badge status-accepted">Đã nhận (Offered)</span>;
+      case 'rejected':
+        return <span className="status-badge status-rejected">Từ chối</span>;
+      case 'interview_scheduled':
+        return <span className="status-badge status-warning">Phỏng vấn</span>;
+      case 'under_review':
+        return <span className="status-badge" style={{backgroundColor: '#3498db', color: 'white'}}>Đang xem xét</span>;
+      default:
+        return <span className="status-badge status-pending">Chờ duyệt</span>;
+    }
   };
 
   if (loading && !selectedJob)
@@ -109,7 +123,7 @@ const JobManager = () => {
   return (
     <div className="manage-container">
       {selectedJob ? (
-        /* ================= VIEW APPLICANTS ================= */
+        /* ================= VIEW APPLICANTS TABLE ================= */
         <div>
           <button className="btn-back" onClick={() => setSelectedJob(null)}>
             ← Quay lại
@@ -152,19 +166,24 @@ const JobManager = () => {
                       <td>{formatDate(app.created_at)}</td>
                       <td>{renderStatus(app.status)}</td>
                       <td>
-                        {app.status !== 'accepted' && (
+                        {/* Nút Chấp nhận -> gửi 'offered' */}
+                        {app.status !== 'offered' && app.status !== 'rejected' && (
                           <button
                             className="action-btn btn-approve"
+                            title="Chấp nhận (Offered)"
                             onClick={() =>
-                              handleUpdateStatus(app.id, 'accepted')
+                              handleUpdateStatus(app.id, 'offered')
                             }
                           >
                             ✓
                           </button>
                         )}
-                        {app.status !== 'rejected' && (
+                        
+                        {/* Nút Từ chối -> gửi 'rejected' */}
+                        {app.status !== 'rejected' && app.status !== 'offered' && (
                           <button
                             className="action-btn btn-reject"
+                            title="Từ chối (Rejected)"
                             onClick={() =>
                               handleUpdateStatus(app.id, 'rejected')
                             }
@@ -187,7 +206,7 @@ const JobManager = () => {
           </div>
         </div>
       ) : (
-        /* ================= JOB LIST ================= */
+        /* ================= JOB LIST TABLE ================= */
         <div>
           <div className="manage-header">
             <h2 className="manage-title">Quản lý tin tuyển dụng</h2>

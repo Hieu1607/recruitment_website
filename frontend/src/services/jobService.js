@@ -1,21 +1,24 @@
 import api from './api';
 
-// --- HELPER: GIỮ NGUYÊN ---
 const mapJobData = (apiJob) => {
   if (!apiJob) return {};
   return {
     id: apiJob.id || apiJob.id_cong_viec || Math.random().toString(),
     title: apiJob.title || apiJob.ten_cong_viec || "Công việc chưa có tên",
+    
+    // --- THÔNG TIN CÔNG TY ---
     companyId: apiJob.company_id || apiJob.id_cong_ty || null,
     companyName: apiJob.company_name || apiJob.ten_cong_ty || null,
+    
+    // 👇 THÊM DÒNG NÀY ĐỂ HỨNG LOGO TỪ API JOB (Nếu backend có gửi kèm)
+    companyLogo: apiJob.company_logo || apiJob.logo || apiJob.company?.logo || null, 
+
     salary: apiJob.salary || apiJob.muc_luong || "Thỏa thuận",
     location: (apiJob.location || apiJob.dia_diem_lam_viec || "").toString(),
+    // ... các trường khác giữ nguyên
     level: apiJob.level || "",
     deadline: apiJob.deadline || apiJob.thoi_han_tuyen_dung || "",
-    companyType: apiJob.company_type || apiJob.loai_hinh_hoat_dong || "",
     description: apiJob.description || apiJob.mo_ta || "Chưa có mô tả chi tiết",
-    requirements: apiJob.requirements || apiJob.yeu_cau || "Chưa có yêu cầu cụ thể",
-    benefits: apiJob.benefits || apiJob.quyen_loi || "Chưa có thông tin quyền lợi",
     createdAt: apiJob.created_at,
     updatedAt: apiJob.updated_at
   };

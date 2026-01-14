@@ -1,82 +1,139 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import jobService from '../services/jobService';
-import CompanyName from '../components/CompanyName'; // Import component hiển thị tên công ty
+import companyService from '../services/companyService'; // Import thêm service này
+import CompanyName from '../components/CompanyName';
 import '../css/AppliedJobs.css';
 
-// --- COMPONENT THÔNG MINH: TỰ TÌM DỮ LIỆU CÒN THIẾU ---
+// --- HELPER: Xử lý đường dẫn ảnh ---
+const normalizeUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    const BACKEND_URL = 'http://localhost:5000'; // Đổi cổng nếu backend khác 5000
+    return `${BACKEND_URL}${url.startsWith('/') ? url : `/${url}`}`;
+};
+
+// --- COMPONENT CON: ASYNC JOB CARD ---
 const AsyncJobCard = ({ app, getStatusInfo }) => {
     const navigate = useNavigate();
     
-    // Khởi tạo state với dữ liệu có sẵn (nếu có)
+    // 1. Khởi tạo state từ dữ liệu có sẵn trong prop 'app'
     const [jobInfo, setJobInfo] = useState({
         title: app.jobTitle || app.job?.title || "Đang tải...",
         companyId: app.companyId || app.job?.companyId || null,
-        companyLogo: app.companyLogo || app.job?.companyLogo || null
+        // Ưu tiên tìm logo ở mọi chỗ có thể trong dữ liệu ban đầu
+        companyLogo: app.companyLogo || app.job?.companyLogo || app.job?.company?.logo_company_url || null,
+        companyName: app.companyName || app.job?.companyName || "Company"
     });
 
     const jobId = app.jobId || app.job_id || app.job?.id || app.job;
 
-    // useEffect này đóng vai trò "Bắc cầu": 
-    // Có Job ID -> Gọi API Job -> Lấy Job Title + Company ID -> Truyền cho component con
+    // 2. Logic "Bắc cầu": Tìm dữ liệu còn thiếu
     useEffect(() => {
-        // Chỉ gọi API nếu thiếu thông tin quan trọng (Title hoặc CompanyId)
-        if (jobId && (!jobInfo.title || jobInfo.title === "Đang tải..." || !jobInfo.companyId)) {
-            const fetchJobDetail = async () => {
+        const fetchMissingData = async () => {
+            let currentCompanyId = jobInfo.companyId;
+            let currentLogo = jobInfo.companyLogo;
+
+            // BƯỚC 1: Nếu thiếu Job Title hoặc Company ID -> Gọi API Job
+            if (jobId && (!jobInfo.title || jobInfo.title === "Đang tải..." || !currentCompanyId)) {
                 try {
                     const data = await jobService.getJobById(jobId);
                     if (data) {
                         setJobInfo(prev => ({
                             ...prev,
-                            title: data.title || data.ten_cong_viec || "Vị trí không xác định",
-                            // QUAN TRỌNG: Lấy CompanyID từ chi tiết job để lát nữa đưa vào thẻ CompanyName
-                            companyId: data.companyId || data.company_id || data.id_cong_ty, 
-                            companyLogo: data.companyLogo || prev.companyLogo
+                            title: data.title || data.ten_cong_viec || prev.title,
+                            companyId: data.companyId || data.company_id || prev.companyId,
+                            companyName: data.companyName || prev.companyName
+                        }));
+                        currentCompanyId = data.companyId || data.company_id;
+                    }
+                } catch (error) {
+                    console.error("Lỗi job:", jobId);
+                }
+            }
+
+            // BƯỚC 2: Nếu có ID Công ty mà chưa có Logo -> Gọi API Company lấy 'logo_company_url'
+            if (currentCompanyId && !currentLogo) {
+                try {
+                    const companyData = await companyService.getCompanyById(currentCompanyId);
+                    // 👇 Lấy đúng trường trong API Docs bạn gửi
+                    const realLogo = companyData?.logo_company_url;
+                    const realName = companyData?.name;
+
+                    if (realLogo || realName) {
+                        setJobInfo(prev => ({
+                            ...prev,
+                            companyLogo: realLogo || prev.companyLogo,
+                            companyName: realName || prev.companyName
                         }));
                     }
                 } catch (error) {
-                    console.error("Lỗi lấy chi tiết job:", jobId);
-                    setJobInfo(prev => ({ ...prev, title: "Không tìm thấy công việc" }));
+                    console.error("Lỗi company:", currentCompanyId);
                 }
-            };
-            fetchJobDetail();
-        }
+            }
+        };
+
+        fetchMissingData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [jobId]);
 
     const statusInfo = getStatusInfo(app.status);
-    const cvLink = app.cvUrl || app.cv_url; 
+    const cvLink = normalizeUrl(app.cvUrl || app.cv_url);
     const dateString = app.applicationDate || app.created_at;
-    const displayLogo = jobInfo.companyLogo || "https://placehold.co/60x60?text=Logo";
+    const logoUrl = normalizeUrl(jobInfo.companyLogo);
+
+    // --- LOGIC HIỂN THỊ LOGO HOẶC CHỮ CÁI ---
+    const renderLogo = () => {
+        if (logoUrl) {
+            return (
+                <img 
+                    src={logoUrl} 
+                    alt="Logo" 
+                    className="company-logo-small"
+                    onError={(e) => { e.target.style.display = 'none'; }} // Nếu ảnh lỗi thì ẩn đi để hiện chữ cái bên dưới
+                />
+            );
+        }
+        // Fallback: Tạo logo chữ cái (Ví dụ: "T" cho "Tech Solutions")
+        const firstLetter = jobInfo.companyName ? jobInfo.companyName.charAt(0).toUpperCase() : "C";
+        return (
+            <div className="company-logo-placeholder" style={{
+                width: '60px', height: '60px', backgroundColor: '#e0e7ff', color: '#4f46e5',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 'bold', fontSize: '24px', borderRadius: '8px'
+            }}>
+                {firstLetter}
+            </div>
+        );
+    };
 
     return (
         <div className="app-card">
             <div className="app-card-header">
-                <img 
-                    src={displayLogo} 
-                    alt="Logo" 
-                    className="company-logo-small"
-                    onError={(e) => e.target.src = "https://placehold.co/60x60?text=Logo"}
-                />
+                {/* Logo Area */}
+                <div className="logo-wrapper">
+                    {renderLogo()}
+                </div>
+
                 <div className="app-basic-info">
-                    {/* 1. HIỂN THỊ TÊN CÔNG VIỆC */}
+                    {/* Tên công việc */}
                     <h3 
                         onClick={() => jobId && navigate(`/jobs/${jobId}`)}
                         style={{ cursor: 'pointer', color: '#2563eb' }}
-                        title="Xem chi tiết"
                     >
                         {jobInfo.title}
                     </h3>
 
-                    {/* 2. HIỂN THỊ TÊN CÔNG TY (Dựa vào Company ID vừa tìm được) */}
+                    {/* Tên công ty */}
                     <div className="company-name" style={{ fontWeight: '500', color: '#555' }}>
-                        {/* Nếu có Company ID, component này sẽ tự gọi API lấy tên chuẩn */}
                         {jobInfo.companyId ? (
-                            <CompanyName id={jobInfo.companyId} initialName={null} />
+                            <CompanyName id={jobInfo.companyId} initialName={jobInfo.companyName} />
                         ) : (
-                            <span>Đang cập nhật...</span>
+                            <span>{jobInfo.companyName}</span>
                         )}
                     </div>
                 </div>
+                
                 <span className={`status-badge ${statusInfo.className}`}>
                     {statusInfo.icon} {statusInfo.label}
                 </span>
@@ -93,17 +150,10 @@ const AsyncJobCard = ({ app, getStatusInfo }) => {
                     <span className="label">📄 CV đã gửi:</span>
                     <span className="value">
                         {cvLink ? (
-                            <a 
-                                href={cvLink.startsWith('http') ? cvLink : `http://localhost:8080${cvLink}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="cv-link"
-                            >
+                            <a href={cvLink} target="_blank" rel="noopener noreferrer" className="cv-link">
                                 Xem hồ sơ
                             </a>
-                        ) : (
-                            <span className="text-muted">Không tìm thấy file</span>
-                        )}
+                        ) : <span className="text-muted">Không tìm thấy file</span>}
                     </span>
                 </div>
             </div>
@@ -114,9 +164,11 @@ const AsyncJobCard = ({ app, getStatusInfo }) => {
                     onClick={() => jobId && navigate(`/jobs/${jobId}`)}
                     disabled={!jobId}
                 >
-                    Xem lại tin tuyển dụng
+                    Xem lại tin
                 </button>
-                {app.status === 'ACCEPTED' && (
+                {/* Kiểm tra đúng status 'offered' của API */}
+                {(String(app.status).toLowerCase() === 'offered' || 
+                  String(app.status).toLowerCase() === 'accepted') && (
                     <button className="btn-contact">Liên hệ HR</button>
                 )}
             </div>
@@ -136,7 +188,7 @@ const AppliedJobs = () => {
                 const data = await jobService.getAppliedJobs();
                 setApplications(data || []); 
             } catch (error) {
-                console.error("Lỗi tải lịch sử ứng tuyển:", error);
+                console.error("Lỗi tải lịch sử:", error);
             } finally {
                 setLoading(false);
             }
@@ -145,11 +197,14 @@ const AppliedJobs = () => {
     }, []);
 
     const getStatusInfo = (status) => {
-        switch (status) {
-            case 'PENDING': return { label: 'Đang chờ', className: 'badge-pending', icon: '⏳' };
-            case 'REVIEWING': return { label: 'Đang xem xét', className: 'badge-reviewing', icon: '👀' };
-            case 'ACCEPTED': return { label: 'Được nhận', className: 'badge-accepted', icon: '✅' };
-            case 'REJECTED': return { label: 'Từ chối', className: 'badge-rejected', icon: '❌' };
+        const s = status ? String(status).toLowerCase() : '';
+        switch (s) {
+            case 'rejected': return { label: 'Đã từ chối', className: 'badge-rejected', icon: '❌' };
+            case 'offered': 
+            case 'accepted': return { label: 'Được nhận', className: 'badge-accepted', icon: '🎉' };
+            case 'interview_scheduled': return { label: 'Phỏng vấn', className: 'badge-reviewing', icon: '💬' };
+            case 'under_review': 
+            case 'reviewing': return { label: 'Đang xem xét', className: 'badge-reviewing', icon: '👀' };
             default: return { label: 'Đang chờ', className: 'badge-pending', icon: '⏳' };
         }
     };
@@ -168,10 +223,7 @@ const AppliedJobs = () => {
                     <div className="empty-state">
                         <div className="empty-icon">📂</div>
                         <h3>Bạn chưa ứng tuyển công việc nào</h3>
-                        <p>Hãy tìm kiếm cơ hội việc làm tốt nhất dành cho bạn ngay hôm nay.</p>
-                        <button className="btn-find-now" onClick={() => navigate('/')}>
-                            Tìm việc ngay
-                        </button>
+                        <button className="btn-find-now" onClick={() => navigate('/')}>Tìm việc ngay</button>
                     </div>
                 ) : (
                     <div className="application-grid">
