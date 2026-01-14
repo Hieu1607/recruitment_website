@@ -1,9 +1,8 @@
 import api from './api';
 
-// --- DÀNH CHO ỨNG VIÊN (USER) ---
-// API Profile giữ nguyên như cũ
-const PROFILE_URL = '/v1/profiles'; // Hoặc đường dẫn profile trong backend của bạn
+const PROFILE_URL = '/v1/profiles'; 
 
+// ================= USER (CÁ NHÂN) =================
 export const getMyProfile = async () => {
   try {
     const res = await api.get(`${PROFILE_URL}/me`);
@@ -14,47 +13,54 @@ export const getMyProfile = async () => {
 };
 
 export const updateMyProfile = async (formData) => {
+  // QUAN TRỌNG: Cần header multipart/form-data để gửi ảnh
   const res = await api.put(`${PROFILE_URL}/me`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return res.data.data;
 };
 
-// --- DÀNH CHO NHÀ TUYỂN DỤNG (COMPANY) ---
-
-// 1. Lấy công ty của tôi (Theo doc: GET /companies/my/company)
-export const getMyCompany = async () => {
+// ================= PUBLIC PROFILE =================
+// LẤY PROFILE THEO USER ID (để lấy tên ứng viên)
+export const getProfileByUserId = async (userId) => {
   try {
-    // Lưu ý: Đường dẫn này phải khớp với route backend
-    // Nếu backend bạn prefix /api thì api.js đã lo phần đó.
-    // Ở đây ta gọi: /companies/my/company
-    const res = await api.get('/companies/my/company'); 
+    const res = await api.get(`${PROFILE_URL}/${userId}`);
     return res.data.data;
   } catch (error) {
-    // Backend trả về 404 nếu chưa có công ty -> FE sẽ hiểu là cần tạo mới
     return null;
   }
 };
 
-// 2. Tạo công ty mới (Theo doc: POST /companies)
-// Dùng khi User mới đăng ký, chưa có Company
-export const createCompanyProfile = async (data) => {
-    // Endpoint tạo mới thường không cần ID
-    const res = await api.post('/companies', data);
+// ================= COMPANY (NHÀ TUYỂN DỤNG) =================
+export const getMyCompany = async () => {
+  try {
+    const res = await api.get('/v1/companies/my/company'); 
     return res.data.data;
+  } catch (error) {
+    return null;
+  }
 };
 
-// 3. Cập nhật công ty (Theo doc: PUT /companies/:id)
-// Dùng khi đã có Company ID
-export const updateCompanyProfile = async (id, data) => {
-  if (!id) throw new Error("Missing Company ID");
-  const res = await api.put(`/companies/${id}`, data); 
+export const createCompanyProfile = async (formData) => {
+  const res = await api.post('/v1/companies', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return res.data.data;
 };
 
+export const updateCompanyProfile = async (id, formData) => {
+  if (!id) throw new Error("Missing Company ID");
+  const res = await api.put(`/v1/companies/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }); 
+  return res.data.data;
+};
+
+// ================= DEFAULT EXPORT =================
 const profileService = {
   getMyProfile,
   updateMyProfile,
+  getProfileByUserId,
   getMyCompany,
   createCompanyProfile,
   updateCompanyProfile

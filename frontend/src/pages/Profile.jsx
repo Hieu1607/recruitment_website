@@ -1,42 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { 
-    getMyProfile, 
-    updateMyProfile, 
-    getMyCompany, 
-    createCompanyProfile, // Đảm bảo bạn đã thêm hàm này trong profileService.js
-    updateCompanyProfile 
-} from '../services/profileService';
+// CHỈ import các hàm liên quan đến cá nhân
+import { getMyProfile, updateMyProfile } from '../services/profileService';
 import { ROLE_ID } from '../utils/roles';
-import '../css/profile.css';
+import '../css/profile.css'; // Dùng lại đúng file CSS cũ của bạn
 
-/* ================= UTIL ================= */
 const getFileName = (url) => {
   try {
     const fileName = decodeURIComponent(url.split('/').pop());
-    const parts = fileName.split('_');
-    return parts.length > 1 ? parts.slice(1).join('_') : fileName;
+    return fileName.split('_').slice(1).join('_') || fileName;
   } catch {
-    return 'CV';
+    return 'File';
   }
 };
 
 const Profile = () => {
   const [userRole, setUserRole] = useState(null);
-  
-  // State Ứng viên
   const [profile, setProfile] = useState(null); 
-  
-  // State Công ty
-  const [company, setCompany] = useState(null); 
-  const [companyId, setCompanyId] = useState(null); // Để check xem là Tạo mới hay Cập nhật
-
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Form Data (Dùng chung cho cả 2 role khi edit)
+  // Form State
   const [editData, setEditData] = useState({});
-  
-  // State riêng cho Ứng viên (File)
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState('');
   const [cvFiles, setCvFiles] = useState([]);
@@ -46,30 +30,19 @@ const Profile = () => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
     if (storedUser) {
         setUserRole(storedUser.role_id);
-        fetchData(storedUser.role_id);
+        fetchData();
     } else {
         setLoading(false);
     }
   }, []);
 
-  const fetchData = async (roleId) => {
+  const fetchData = async () => {
     try {
-      if (roleId === ROLE_ID.EMPLOYER) {
-          // --- LOGIC NHÀ TUYỂN DỤNG ---
-          const data = await getMyCompany();
-          if (data) {
-              setCompany(data);
-              setCompanyId(data.id); // Lưu ID để dùng cho lệnh PUT
-          } else {
-              setCompany({}); // Chưa có công ty
-              setCompanyId(null); // Null nghĩa là sẽ dùng lệnh POST
-          }
-      } else {
-          // --- LOGIC ỨNG VIÊN ---
-          const data = await getMyProfile();
-          setProfile(data);
-          setAvatarPreview(data?.avatar_url || 'https://via.placeholder.com/150');
-      }
+      // QUAN TRỌNG: Luôn gọi getMyProfile cho cả Employer lẫn Candidate
+      // Vì đây là trang thông tin cá nhân
+      const data = await getMyProfile();
+      setProfile(data);
+      setAvatarPreview(data?.avatar_url || 'https://via.placeholder.com/150');
     } catch (err) {
       console.error(err);
     } finally {
@@ -79,28 +52,17 @@ const Profile = () => {
 
   /* ================= HANDLERS ================= */
   const handleEditClick = () => {
-    if (userRole === ROLE_ID.EMPLOYER) {
-        // Load data công ty vào form
-        setEditData({
-            name: company?.name || '',
-            website: company?.website || '',
-            phone: company?.phone || '', // Lưu ý: API cần trả về phone nếu muốn hiện
-            address: company?.address || '',
-            size: company?.size || '1-10', // Default size theo API doc
-            description: company?.description || ''
-        });
-    } else {
-        // Load data ứng viên
-        setEditData({
-            full_name: profile?.full_name || '',
-            phone: profile?.phone || '',
-            address: profile?.address || '',
-            dob: profile?.dob || '',
-            education: profile?.education || '',
-            experience: profile?.experience || '',
-            skills: profile?.skills || '',
-        });
-    }
+    // Nạp dữ liệu vào form sửa
+    setEditData({
+        full_name: profile?.full_name || '',
+        phone: profile?.phone || '',
+        address: profile?.address || '',
+        dob: profile?.dob || '',
+        // Các trường này ứng viên mới cần, nhưng cứ init để code sạch
+        education: profile?.education || '',
+        experience: profile?.experience || '',
+        skills: profile?.skills || '',
+    });
     setIsEditing(true);
   };
 
@@ -108,7 +70,7 @@ const Profile = () => {
     setIsEditing(false);
     setAvatarFile(null);
     setCvFiles([]);
-    if (profile) setAvatarPreview(profile.avatar_url || 'https://via.placeholder.com/150');
+    setAvatarPreview(profile?.avatar_url || 'https://via.placeholder.com/150');
   };
 
   const handleChange = (e) => {
@@ -126,350 +88,222 @@ const Profile = () => {
 
   const handleCvChange = (e) => {
     const files = Array.from(e.target.files);
-    if ((profile?.cv_url?.length || 0) + files.length > 5) {
-      alert('Chỉ được tối đa 5 CV');
-      return;
-    }
     setCvFiles(files);
   };
 
-  // --- HÀM LƯU QUAN TRỌNG ĐÃ SỬA ---
   const handleSave = async () => {
     setLoading(true);
     try {
-      if (userRole === ROLE_ID.EMPLOYER) {
-          // === LOGIC CHO CÔNG TY (Theo đúng API Doc) ===
-          let updatedCompany;
-          
-          if (companyId) {
-              // CASE 1: Đã có ID -> Gọi PUT /companies/:id
-              updatedCompany = await updateCompanyProfile(companyId, editData);
-              alert('Cập nhật thông tin công ty thành công!');
-          } else {
-              // CASE 2: Chưa có ID -> Gọi POST /companies
-              updatedCompany = await createCompanyProfile(editData);
-              setCompanyId(updatedCompany.id); // Cập nhật ID mới tạo
-              alert('Tạo hồ sơ công ty thành công!');
-          }
-          
-          setCompany(updatedCompany);
-
-      } else {
-          // === LOGIC CHO ỨNG VIÊN (Giữ nguyên) ===
-          const formData = new FormData();
-          Object.entries(editData).forEach(([key, value]) => {
-            if (value) formData.append(key, value);
-          });
-          if (avatarFile) formData.append('avatar', avatarFile);
-          cvFiles.forEach((file) => formData.append('cv', file));
-
-          const updated = await updateMyProfile(formData);
-          setProfile(updated);
-          setAvatarPreview(updated.avatar_url || avatarPreview);
-          window.dispatchEvent(new Event('profileUpdated'));
-          alert('Cập nhật hồ sơ thành công!');
-      }
+      // Logic Save giống hệt nhau cho cả 2 Role
+      const formData = new FormData();
       
-      setIsEditing(false);
-      setAvatarFile(null);
-      setCvFiles([]);
+      // 1. Text Data
+      Object.entries(editData).forEach(([k, v]) => v && formData.append(k, v));
+      
+      // 2. Avatar
+      if (avatarFile) formData.append('avatar', avatarFile);
+      
+      // 3. CV (Nếu là Employer thì mảng này rỗng, không ảnh hưởng gì)
+      cvFiles.forEach((file) => formData.append('cv', file));
 
+      const updated = await updateMyProfile(formData);
+      setProfile(updated);
+      setAvatarPreview(updated.avatar_url || avatarPreview);
+      
+      // Bắn event để Header cập nhật tên/avatar ngay lập tức
+      window.dispatchEvent(new Event('profileUpdated'));
+      
+      alert('Cập nhật hồ sơ cá nhân thành công!');
+      setIsEditing(false);
     } catch (err) {
-      console.error(err);
-      const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Lỗi khi lưu dữ liệu';
-      alert(`Lỗi: ${errorMsg}`);
+      alert('Lỗi: ' + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
     }
   };
 
-  /* ================= RENDER ================= */
-  if (loading) return <div className="profile-loading">Đang tải...</div>;
-
-  // --- VIEW: NHÀ TUYỂN DỤNG ---
-  if (userRole === ROLE_ID.EMPLOYER) {
-      return (
-        <div className="profile-container">
-            <div className="profile-card">
-                <div style={{width: '100%', padding: '20px'}}>
-                    <h2 style={{borderBottom: '2px solid #00b14f', paddingBottom: '10px', marginBottom: '20px'}}>
-                        Thông tin doanh nghiệp
-                    </h2>
-                    
-                    {!isEditing ? (
-                        <div>
-                            {/* Nếu chưa có công ty thì hiện thông báo */}
-                            {!companyId ? (
-                                <div style={{textAlign:'center', color: '#666', margin: '30px 0'}}>
-                                    <p>Bạn chưa cập nhật hồ sơ công ty.</p>
-                                    <button className="btn btn-edit-profile" onClick={handleEditClick}>
-                                        ➕ Tạo hồ sơ công ty ngay
-                                    </button>
-                                </div>
-                            ) : (
-                                <>
-                                    <h3>{company.name}</h3>
-                                    <p><strong>Website:</strong> <a href={company.website} target="_blank" rel="noreferrer">{company.website || '---'}</a></p>
-                                    <p><strong>Quy mô:</strong> {company.size} nhân viên</p>
-                                    <p><strong>Địa chỉ:</strong> {company.address || '---'}</p>
-                                    <hr/>
-                                    <h5>Giới thiệu:</h5>
-                                    <p style={{whiteSpace: 'pre-line'}}>{company.description || 'Chưa có mô tả'}</p>
-                                    
-                                    <button className="btn btn-edit-profile" onClick={handleEditClick} style={{marginTop: '20px'}}>
-                                        ✏️ Chỉnh sửa thông tin
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    ) : (
-                        // Form Edit cho Company
-                        <div className="employer-form">
-                            <div className="form-group mb-3">
-                                <label>Tên công ty <span className="text-danger">*</span></label>
-                                <input className="edit-input" name="name" value={editData.name} onChange={handleChange} placeholder="Nhập tên công ty..." />
-                            </div>
-                            <div className="row">
-                                <div className="col-md-6 form-group mb-3">
-                                    <label>Website</label>
-                                    <input className="edit-input" name="website" value={editData.website} onChange={handleChange} placeholder="https://..." />
-                                </div>
-                                <div className="col-md-6 form-group mb-3">
-                                    <label>Quy mô</label>
-                                    <select className="edit-input" name="size" value={editData.size} onChange={handleChange} style={{width:'100%', padding:'10px'}}>
-                                        <option value="1-10">1-10</option>
-                                        <option value="11-50">11-50</option>
-                                        <option value="51-200">51-200</option>
-                                        <option value="201-500">201-500</option>
-                                        <option value="501-1000">501-1000</option>
-                                        <option value="1001-5000">1001-5000</option>
-                                        <option value="5000+">5000+</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="form-group mb-3">
-                                <label>Địa chỉ</label>
-                                <input className="edit-input" name="address" value={editData.address} onChange={handleChange} />
-                            </div>
-                            <div className="form-group mb-3">
-                                <label>Giới thiệu công ty</label>
-                                <textarea className="edit-textarea" rows="5" name="description" value={editData.description} onChange={handleChange}></textarea>
-                            </div>
-
-                            <div className="action-buttons">
-                                <button className="btn btn-save" onClick={handleSave}>
-                                    {companyId ? 'Lưu thay đổi' : 'Tạo mới'}
-                                </button>
-                                <button className="btn btn-cancel" onClick={handleCancel}>Hủy</button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-      );
-  }
-
-  // --- VIEW: ỨNG VIÊN (FULL CODE) ---
+  if (loading) return <div className="profile-loading">Đang tải dữ liệu...</div>;
   if (!profile) return <div className="profile-error">Không có dữ liệu hồ sơ</div>;
+
+  const isEmployer = userRole === ROLE_ID.EMPLOYER;
 
   return (
     <div className="profile-container">
       <div className="profile-card">
-        {/* ===== CỘT TRÁI: AVATAR & THÔNG TIN CÁ NHÂN ===== */}
+        
+        {/* ===== CỘT TRÁI (SIDEBAR) ===== */}
+        {/* Logic hiển thị Avatar và Tên giống hệt nhau cho cả 2 Role */}
         <div className="profile-sidebar">
-          <div className="avatar-wrapper">
-            {isEditing ? (
-              <label className="avatar-label-edit">
-                <img src={avatarPreview} className="profile-avatar editing" alt="Avatar" />
-                <div className="camera-overlay">
-                    <span>📷 Đổi ảnh</span>
+            <div className="avatar-wrapper">
+                {isEditing ? (
+                    <label className="avatar-label-edit">
+                        <img src={avatarPreview} className="profile-avatar editing" alt="Avatar" />
+                        <div className="camera-overlay"><span>📷 Đổi ảnh</span></div>
+                        <input type="file" hidden accept="image/*" onChange={handleAvatarChange} />
+                    </label>
+                ) : (
+                    <img src={avatarPreview} className="profile-avatar" alt="Avatar" />
+                )}
+            </div>
+            
+            <div style={{width: '100%', textAlign: 'center'}}>
+                {isEditing ? (
+                    <div style={{marginBottom: '10px'}}>
+                         <input 
+                            className="edit-input name-input" // Dùng class edit-input của css cũ
+                            name="full_name" 
+                            value={editData.full_name} 
+                            onChange={handleChange} 
+                            placeholder="Họ và tên"
+                            style={{textAlign: 'center', fontWeight: 'bold'}}
+                        />
+                    </div>
+                ) : (
+                    <h2 className="profile-name">{profile.full_name || 'Người dùng'}</h2>
+                )}
+                
+                <p className="profile-email">{profile.email}</p>
+                
+                {/* Badge phân biệt Role cho đẹp */}
+                <div style={{marginBottom: '15px'}}>
+                     <span style={{
+                         padding: '4px 10px', 
+                         borderRadius: '12px', 
+                         background: isEmployer ? '#e3f2fd' : '#e6f7ef',
+                         color: isEmployer ? '#0d47a1' : '#00b14f',
+                         fontSize: '12px', fontWeight: 'bold'
+                     }}>
+                         {isEmployer ? 'NHÀ TUYỂN DỤNG' : 'ỨNG VIÊN'}
+                     </span>
                 </div>
-                <input type="file" hidden accept="image/*" onChange={handleAvatarChange} />
-              </label>
-            ) : (
-              <img src={avatarPreview} className="profile-avatar" alt="Avatar" />
-            )}
-          </div>
-
-          <div className="sidebar-info">
-            {isEditing ? (
-              <div className="form-group">
-                <label>Họ và tên</label>
-                <input
-                  className="edit-input name-input"
-                  name="full_name"
-                  value={editData.full_name}
-                  onChange={handleChange}
-                />
-              </div>
-            ) : (
-              <h2 className="profile-name">{profile.full_name || 'Chưa cập nhật tên'}</h2>
-            )}
-            <p className="profile-email">{profile.email}</p>
-          </div>
-
-          <hr className="divider" />
-
-          {/* THÔNG TIN LIÊN HỆ */}
-          <div className="contact-info">
-            <div className="info-item">
-              <span className="info-icon">📞</span>
-              {isEditing ? (
-                <input 
-                    name="phone" placeholder="Số điện thoại" 
-                    value={editData.phone} onChange={handleChange} className="edit-input" 
-                />
-              ) : (
-                <span>{profile.phone || 'Chưa có SĐT'}</span>
-              )}
             </div>
 
-            <div className="info-item">
-              <span className="info-icon">🎂</span>
-              {isEditing ? (
-                <input 
-                    type="date" name="dob" 
-                    value={editData.dob} onChange={handleChange} className="edit-input" 
-                />
-              ) : (
-                <span>{profile.dob || 'Chưa có ngày sinh'}</span>
-              )}
-            </div>
+            <hr className="divider" />
 
-            <div className="info-item">
-              <span className="info-icon">📍</span>
-              {isEditing ? (
-                <input 
-                    name="address" placeholder="Địa chỉ" 
-                    value={editData.address} onChange={handleChange} className="edit-input" 
-                />
-              ) : (
-                <span>{profile.address || 'Chưa có địa chỉ'}</span>
-              )}
+            {/* Thông tin liên hệ cơ bản */}
+            <div className="contact-info">
+                <div className="info-item">
+                    <span className="info-icon">📞</span>
+                    {isEditing ? (
+                        <input className="edit-input" name="phone" value={editData.phone} onChange={handleChange} placeholder="Số điện thoại" />
+                    ) : (
+                        <span>{profile.phone || 'Chưa cập nhật SĐT'}</span>
+                    )}
+                </div>
+
+                <div className="info-item">
+                    <span className="info-icon">📍</span>
+                    {isEditing ? (
+                        <input className="edit-input" name="address" value={editData.address} onChange={handleChange} placeholder="Địa chỉ" />
+                    ) : (
+                        <span>{profile.address || 'Chưa cập nhật địa chỉ'}</span>
+                    )}
+                </div>
+
+                <div className="info-item">
+                    <span className="info-icon">🎂</span>
+                    {isEditing ? (
+                        <input className="edit-input" type="date" name="dob" value={editData.dob} onChange={handleChange} />
+                    ) : (
+                        <span>{profile.dob || 'Chưa cập nhật ngày sinh'}</span>
+                    )}
+                </div>
             </div>
-          </div>
         </div>
 
-        {/* ===== CỘT PHẢI: NỘI DUNG CHUYÊN MÔN ===== */}
+        {/* ===== CỘT PHẢI (CONTENT) ===== */}
         <div className="profile-content">
-          
-          {/* 1. HỌC VẤN */}
-          <div className="section-block">
-            <h3 className="section-title">Học vấn</h3>
-            {isEditing ? (
-              <textarea
-                className="edit-textarea"
-                name="education"
-                rows="3"
-                placeholder="Trường đại học, bằng cấp..."
-                value={editData.education}
-                onChange={handleChange}
-              />
-            ) : (
-              <p className="text-content">{profile.education || 'Chưa cập nhật thông tin học vấn'}</p>
-            )}
-          </div>
+            <h2 className="section-title">Thông tin chi tiết</h2>
 
-          {/* 2. KINH NGHIỆM */}
-          <div className="section-block">
-            <h3 className="section-title">Kinh nghiệm làm việc</h3>
-            {isEditing ? (
-              <textarea
-                className="edit-textarea"
-                name="experience"
-                rows="4"
-                placeholder="Mô tả kinh nghiệm làm việc của bạn..."
-                value={editData.experience}
-                onChange={handleChange}
-              />
-            ) : (
-              <p className="text-content">{profile.experience || 'Chưa cập nhật kinh nghiệm'}</p>
-            )}
-          </div>
+            {/* Nếu là ỨNG VIÊN: Hiện đầy đủ CV, Kỹ năng... */}
+            {!isEmployer && (
+                <>
+                    <div className="section-block">
+                        <h3 style={{fontSize:'16px', fontWeight:'600', marginBottom:'10px', color:'#555'}}>Học vấn</h3>
+                        {isEditing ? (
+                            <textarea className="edit-textarea" rows="3" name="education" value={editData.education} onChange={handleChange} placeholder="Đại học, chứng chỉ..." />
+                        ) : (
+                            <p className="text-content">{profile.education || 'Chưa cập nhật'}</p>
+                        )}
+                    </div>
 
-          {/* 3. KỸ NĂNG */}
-          <div className="section-block">
-            <h3 className="section-title">Kỹ năng</h3>
-            {isEditing ? (
-              <textarea
-                className="edit-textarea"
-                name="skills"
-                rows="2"
-                placeholder="Ví dụ: Java, React, Docker..."
-                value={editData.skills}
-                onChange={handleChange}
-              />
-            ) : (
-              <div className="skills-list">
-                {profile.skills
-                  ? profile.skills.split(',').map((s, i) => (
-                      <span key={i} className="skill-tag">{s.trim()}</span>
-                    ))
-                  : <span className="text-muted">Chưa có kỹ năng</span>}
-              </div>
-            )}
-          </div>
+                    <div className="section-block">
+                        <h3 style={{fontSize:'16px', fontWeight:'600', marginBottom:'10px', color:'#555'}}>Kinh nghiệm làm việc</h3>
+                        {isEditing ? (
+                            <textarea className="edit-textarea" rows="4" name="experience" value={editData.experience} onChange={handleChange} placeholder="Mô tả kinh nghiệm..." />
+                        ) : (
+                            <p className="text-content">{profile.experience || 'Chưa cập nhật'}</p>
+                        )}
+                    </div>
 
-          {/* 4. CV ĐÍNH KÈM */}
-          <div className="section-block">
-            <h3 className="section-title">Hồ sơ đính kèm (CV)</h3>
-            
-            {isEditing && (
-              <div className="file-upload-area">
-                <input
-                  type="file"
-                  multiple
-                  id="cv-upload"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleCvChange}
-                  className="file-input-hidden"
-                />
-                <label htmlFor="cv-upload" className="btn-upload">
-                    📂 Chọn file CV (Tối đa 5)
-                </label>
-                
-                {cvFiles.length > 0 && (
-                  <ul className="cv-preview-list">
-                    {cvFiles.map((file, i) => (
-                      <li key={i} className="new-file">🆕 {file.name}</li>
-                    ))}
-                  </ul>
+                    <div className="section-block">
+                        <h3 style={{fontSize:'16px', fontWeight:'600', marginBottom:'10px', color:'#555'}}>Kỹ năng</h3>
+                        {isEditing ? (
+                            <textarea className="edit-textarea" name="skills" value={editData.skills} onChange={handleChange} placeholder="Java, ReactJS, Teamwork..." />
+                        ) : (
+                            <div className="skills-list">
+                                {profile.skills ? profile.skills.split(',').map((s, i) => (
+                                    <span key={i} className="skill-tag">{s.trim()}</span>
+                                )) : <span style={{color:'#999', fontStyle:'italic'}}>Chưa cập nhật kỹ năng</span>}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="section-block">
+                        <h3 style={{fontSize:'16px', fontWeight:'600', marginBottom:'10px', color:'#555'}}>Hồ sơ đính kèm (CV)</h3>
+                        {isEditing && (
+                            <div className="file-upload-area">
+                                <input type="file" multiple id="cv-upload" accept=".pdf,.doc,.docx" onChange={handleCvChange} className="file-input-hidden" />
+                                <label htmlFor="cv-upload" className="btn-upload">📂 Chọn file CV</label>
+                                {cvFiles.length > 0 && (
+                                    <ul className="cv-preview-list">
+                                        {cvFiles.map((file, i) => <li key={i}>🆕 {file.name}</li>)}
+                                    </ul>
+                                )}
+                            </div>
+                        )}
+
+                        {profile.cv_url?.length > 0 ? (
+                            <ul className="cv-list">
+                                {profile.cv_url.map((cv, i) => (
+                                    <li key={i} className="cv-item">
+                                        <a href={cv} target="_blank" rel="noreferrer" className="cv-link">
+                                            <span className="file-icon">📄</span> {getFileName(cv)}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p style={{color:'#999', fontStyle:'italic'}}>Chưa tải lên CV nào</p>
+                        )}
+                    </div>
+                </>
+            )}
+
+            {/* Nếu là NHÀ TUYỂN DỤNG: Chỉ hiện một thông báo nhỏ (Vì họ không cần nhập CV) */}
+            {isEmployer && (
+                <div className="section-block">
+                    <div style={{background: '#f8f9fa', padding: '15px', borderRadius: '8px', borderLeft: '4px solid #00b14f'}}>
+                        <p style={{marginBottom: '5px'}}>👋 Chào <b>{profile.full_name}</b>,</p>
+                        <p>Đây là trang quản lý thông tin tài khoản cá nhân của bạn.</p>
+                        <p>Để cập nhật thông tin về Công ty (Logo, Tên cty, Website...), vui lòng truy cập trang <b>"Công ty của tôi"</b>.</p>
+                    </div>
+                </div>
+            )}
+
+            {/* BUTTONS: Giống nhau cho cả 2 Role */}
+            <div className="action-buttons">
+                {isEditing ? (
+                    <>
+                        <button className="btn btn-save" onClick={handleSave}>Lưu thông tin</button>
+                        <button className="btn btn-cancel" onClick={handleCancel}>Hủy</button>
+                    </>
+                ) : (
+                    <button className="btn btn-edit-profile" onClick={handleEditClick}>
+                        ✏️ Chỉnh sửa hồ sơ
+                    </button>
                 )}
-              </div>
-            )}
-
-            {profile.cv_url?.length > 0 ? (
-              <ul className="cv-list">
-                {profile.cv_url.map((cv, i) => (
-                  <li key={i} className="cv-item">
-                    <a href={cv} target="_blank" rel="noreferrer" className="cv-link">
-                      <span className="file-icon">📄</span> 
-                      {getFileName(cv)}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted">Chưa tải lên CV nào</p>
-            )}
-          </div>
-
-          {/* 5. NÚT CHỨC NĂNG */}
-          <div className="action-buttons">
-            {isEditing ? (
-              <>
-                <button className="btn btn-save" onClick={handleSave} disabled={loading}>
-                    {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
-                </button>
-                <button className="btn btn-cancel" onClick={handleCancel} disabled={loading}>Hủy</button>
-              </>
-            ) : (
-              <button className="btn btn-edit-profile" onClick={handleEditClick}>
-                ✏️ Chỉnh sửa hồ sơ
-              </button>
-            )}
-          </div>
+            </div>
 
         </div>
       </div>

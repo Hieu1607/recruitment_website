@@ -1,5 +1,6 @@
 import api from './api';
 
+// --- HELPER: GIỮ NGUYÊN ---
 const mapJobData = (apiJob) => {
   if (!apiJob) return {};
   return {
@@ -14,11 +15,18 @@ const mapJobData = (apiJob) => {
     companyType: apiJob.company_type || apiJob.loai_hinh_hoat_dong || "",
     description: apiJob.description || apiJob.mo_ta || "Chưa có mô tả chi tiết",
     requirements: apiJob.requirements || apiJob.yeu_cau || "Chưa có yêu cầu cụ thể",
-    benefits: apiJob.benefits || apiJob.quyen_loi || "Chưa có thông tin quyền lợi"
+    benefits: apiJob.benefits || apiJob.quyen_loi || "Chưa có thông tin quyền lợi",
+    createdAt: apiJob.created_at,
+    updatedAt: apiJob.updated_at
   };
 };
 
 const jobService = {
+  
+  /* ========================================================================
+     PHẦN 1: CANDIDATE (ỨNG VIÊN) & PUBLIC - GIỮ NGUYÊN CODE CŨ
+     ======================================================================== */
+
   getJobs: async (keyword = '', location = 'all') => {
     try {
       const params = { limit: 10000 };
@@ -56,35 +64,28 @@ const jobService = {
     }
   },
 
-  /* ================== APPLY JOB (FIXED & CLEANED) ================== */
   applyJob: async (jobId, applicationData = {}) => {
     try {
       const numericJobId = parseInt(jobId, 10);
       let cvUrl = applicationData.cvUrl;
 
-      // 1. Sửa lỗi đuôi file bị lặp (.pdf.pdf -> .pdf)
       if (typeof cvUrl === 'string' && cvUrl.endsWith('.pdf.pdf')) {
         console.warn("⚠️ Phát hiện đuôi file lỗi (.pdf.pdf), đang tự động sửa...");
         cvUrl = cvUrl.replace('.pdf.pdf', '.pdf');
       }
 
-      // 2. Tạo payload gửi đi
       const payload = {
         job_id: numericJobId,
         cv_url: cvUrl
       };
 
       console.log("🚀 Dữ liệu gửi đi (Cleaned):", payload);
-
       const response = await api.post('/v1/applications', payload);
       return response.data;
 
     } catch (error) {
-      // 3. IN CHI TIẾT LỖI RA CONSOLE (QUAN TRỌNG)
       if (error.response?.data?.errors) {
-        // Chuyển object lỗi thành chuỗi dễ đọc
-        console.error("❌ CHI TIẾT LỖI VALIDATION (Copy dòng dưới gửi tôi):");
-        console.error(JSON.stringify(error.response.data.errors, null, 2));
+        console.error("❌ CHI TIẾT LỖI VALIDATION:", JSON.stringify(error.response.data.errors, null, 2));
       } else if (error.response) {
         console.error("❌ Lỗi Server:", error.response.data);
       }
@@ -99,6 +100,80 @@ const jobService = {
     } catch (error) {
       return [];
     }
+  },
+
+  /* ========================================================================
+     PHẦN 2: EMPLOYER (NHÀ TUYỂN DỤNG) - TÍCH HỢP MỚI VÀO ĐÂY
+     ======================================================================== */
+
+  // 1. Tạo tin tuyển dụng mới
+  createJob: async (jobData) => {
+    const response = await api.post('/v1/jobs', jobData);
+    return response.data;
+  },
+
+  // 2. Cập nhật tin tuyển dụng
+  updateJob: async (id, jobData) => {
+    const response = await api.put(`/v1/jobs/${id}`, jobData);
+    return response.data;
+  },
+
+  // 3. Xóa tin tuyển dụng
+  deleteJob: async (id) => {
+    const response = await api.delete(`/v1/jobs/${id}`);
+    return response.data;
+  },
+
+  // 4. Lấy danh sách việc làm CỦA CÔNG TY (Có filter company_id)
+  getMyCompanyJobs: async (companyId, page = 1, limit = 100) => {
+    try {
+        const params = { 
+            company_id: companyId, 
+            page: page, 
+            limit: limit 
+        };
+        const response = await api.get('/v1/jobs', { params });
+        
+        // Map lại dữ liệu cho giống cấu trúc getJobs để tiện hiển thị
+        const rawJobs = response.data.data || [];
+        const jobs = Array.isArray(rawJobs) ? rawJobs.map(mapJobData) : [];
+        
+        return {
+            jobs: jobs,
+            pagination: response.data.pagination || {}
+        };
+    } catch (error) {
+        console.error("Lỗi lấy danh sách job của công ty:", error);
+        return { jobs: [], pagination: {} };
+    }
+  },
+
+  /* ========================================================================
+     PHẦN 3: QUẢN LÝ ỨNG VIÊN (VIEW & APPROVE APPLICANTS)
+     ======================================================================== */
+
+  // 5. Lấy danh sách người đã nộp đơn vào 1 Job cụ thể
+  // --- ĐÃ SỬA LẠI ĐƯỜNG DẪN API CHO ĐÚNG VỚI BACKEND ---
+  getJobApplicants: async (jobId) => {
+    try {
+        // Cũ (Sai): /v1/jobs/${jobId}/applications
+        // Mới (Đúng): /v1/applications/job/${jobId}
+        const response = await api.get(`/v1/applications/job/${jobId}`);
+        
+        // Theo controller của bạn: return successResponse(res, 200, result.applications, ...)
+        // successResponse thường gói data vào trong property 'data'.
+        return response.data.data || response.data || [];
+    } catch (error) {
+        console.error("Lỗi lấy ứng viên:", error);
+        return [];
+    }
+  },
+
+  // 6. Cập nhật trạng thái ứng viên (Duyệt/Từ chối)
+  updateApplicationStatus: async (applicationId, status) => {
+    // status: 'accepted', 'rejected', 'reviewing'...
+    const response = await api.put(`/v1/applications/${applicationId}`, { status });
+    return response.data;
   }
 };
 

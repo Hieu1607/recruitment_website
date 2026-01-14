@@ -1,38 +1,80 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-// --- SỬA LẠI ĐƯỜNG DẪN IMPORT (Chỉ dùng ../) ---
-import { getMyProfile } from '../services/profileService'; 
+import { useNavigate, useLocation } from 'react-router-dom';
+import { getMyProfile, getMyCompany } from '../services/profileService'; 
 import { ROLE_ID } from '../utils/roles'; 
-// ------------------------------------------------
 import '../css/header.css'; 
 
 const Header = ({ isAuthenticated, user, logout }) => {
   const navigate = useNavigate();
+  const location = useLocation(); 
   const [userProfile, setUserProfile] = useState(null);
 
+  // Biến check quyền
+  const isEmployer = user?.role_id === ROLE_ID.EMPLOYER;
+
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (isAuthenticated) {
+    const checkRequirements = async () => {
+      if (!isAuthenticated) return;
+
+      // --- LOGIC CHO NHÀ TUYỂN DỤNG ---
+      if (isEmployer) {
+        
+        // BƯỚC 1: KIỂM TRA CÔNG TY TRƯỚC (QUAN TRỌNG NHẤT)
         try {
-          const data = await getMyProfile();
-          if (data) {
-            setUserProfile(data);
-          }
-        } catch (error) {
-          console.error("Không lấy được profile:", error);
+            const companyData = await getMyCompany();
+            
+            // Nếu chưa có công ty (Backend trả về null hoặc lỗi 404 đã handle thành null)
+            if (!companyData) {
+                // Chỉ thông báo và chuyển hướng nếu KHÔNG ĐANG Ở trang tạo công ty
+                if (location.pathname !== '/employer/company') {
+                    alert("⚠️ Bạn chưa có hồ sơ công ty.\nVui lòng nhập thông tin công ty để bắt đầu sử dụng!");
+                    navigate('/employer/company');
+                }
+                return; // QUAN TRỌNG: Dừng lại ngay, không kiểm tra cá nhân nữa.
+            }
+        } catch (err) {
+            // Dự phòng trường hợp lỗi mạng
+            return; 
         }
+
+        // BƯỚC 2: KIỂM TRA HỒ SƠ CÁ NHÂN (CHỈ CHẠY KHI ĐÃ CÓ CÔNG TY)
+        try {
+            const profileData = await getMyProfile();
+            setUserProfile(profileData); // Lưu để hiển thị Avatar/Tên
+
+            // Kiểm tra các trường quan trọng (Ví dụ: SĐT hoặc Địa chỉ bị thiếu)
+            const isMissingInfo = !profileData?.phone || !profileData?.address;
+
+            if (isMissingInfo) {
+                if (location.pathname !== '/profile') {
+                    alert("⚠️ Hồ sơ cá nhân của bạn còn thiếu (SĐT, Địa chỉ).\nVui lòng cập nhật đầy đủ thông tin liên hệ!");
+                    navigate('/profile');
+                }
+            }
+        } catch (error) {
+            console.error("Lỗi lấy profile:", error);
+        }
+
+      } else {
+        // --- LOGIC CHO ỨNG VIÊN (ROLE KHÁC) ---
+        // Chỉ lấy profile để hiện tên/avatar, không bắt buộc redirect (hoặc tùy bạn thêm)
+        try {
+            const data = await getMyProfile();
+            setUserProfile(data);
+        } catch (e) { console.error(e); }
       }
     };
 
-    fetchProfile();
+    checkRequirements();
 
-    const handleProfileUpdate = () => fetchProfile();
+    // Lắng nghe sự kiện khi user cập nhật xong để load lại header
+    const handleProfileUpdate = () => checkRequirements();
     window.addEventListener('profileUpdated', handleProfileUpdate);
 
     return () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate);
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isEmployer, location.pathname, navigate]);
 
   const handleLogout = () => {
     logout();
@@ -40,12 +82,9 @@ const Header = ({ isAuthenticated, user, logout }) => {
     navigate('/');
   };
 
-  // --- LOGIC HIỂN THỊ THÔNG TIN ---
+  // --- HIỂN THỊ ---
   const displayName = userProfile?.full_name || user?.fullName || user?.full_name || 'User'; 
   const displayAvatar = userProfile?.avatar_url || 'https://placehold.co/150';
-
-  // Kiểm tra quyền
-  const isEmployer = user?.role_id === ROLE_ID.EMPLOYER;
 
   return (
     <header className="header-container">
@@ -53,7 +92,6 @@ const Header = ({ isAuthenticated, user, logout }) => {
         <div className="logo" onClick={() => navigate('/')}>JobCV</div>
         
         <nav className="nav-menu">
-          {/* MENU DÀNH CHO NHÀ TUYỂN DỤNG */}
           {isAuthenticated && isEmployer ? (
             <>
               <span className="nav-item" onClick={() => navigate('/employer/company')}>
@@ -67,7 +105,6 @@ const Header = ({ isAuthenticated, user, logout }) => {
               </span>
             </>
           ) : (
-            /* MENU DÀNH CHO ỨNG VIÊN HOẶC KHÁCH */
             <>
               <span className="nav-item" onClick={() => navigate('/')}>Việc làm</span>
               <span className="nav-item" onClick={() => navigate('/create-cv')}>Tạo CV</span>
@@ -80,8 +117,6 @@ const Header = ({ isAuthenticated, user, logout }) => {
       <div className="header-right">
         {isAuthenticated ? (
           <div className="authenticated-actions">
-            
-            {/* ACTION RIÊNG */}
             {isEmployer ? (
                  <button 
                     className="btn btn-employer" 
@@ -96,16 +131,12 @@ const Header = ({ isAuthenticated, user, logout }) => {
                 </span>
             )}
 
-            {/* AVATAR & USER INFO */}
             <div className="user-info-area" onClick={() => navigate('/profile')}>
               <img
                 src={displayAvatar}
                 className="header-avatar"
                 alt="Avatar"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = 'https://placehold.co/150';
-                }}
+                onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/150'; }}
               />
               <span className="user-name">{displayName}</span>
             </div>
@@ -115,7 +146,6 @@ const Header = ({ isAuthenticated, user, logout }) => {
             </button>
           </div>
         ) : (
-          /* CHƯA ĐĂNG NHẬP */
           <>
             <button className="btn btn-login" onClick={() => navigate('/login')}>
               Đăng nhập

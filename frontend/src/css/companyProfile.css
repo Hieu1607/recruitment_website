@@ -1,0 +1,229 @@
+/* src/css/companyProfile.css */
+
+/* ===== PAGE WRAPPER ===== */
+.profile-company-page {
+    margin-top: 100px;
+    margin-bottom: 50px;
+}
+
+.profile-company-container {
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 20px;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    color: #333;
+}
+
+/* ===== CARD ===== */
+.profile-company-card {
+    display: flex;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eaeaea;
+    overflow: hidden;
+    min-height: 600px;
+}
+
+/* ===== SIDEBAR ===== */
+.profile-company-sidebar {
+    width: 280px;
+    background: #f8fdfb;
+    border-right: 1px solid #eee;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* LOGO */
+.profile-company-avatar-wrapper {
+    width: 140px;
+    height: 140px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid #e0f3eb;
+    position: relative;
+    margin-bottom: 15px;
+    background: #fff;
+}
+
+.profile-company-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 10px;
+}
+
+.profile-company-upload-label {
+    cursor: pointer;
+    position: absolute;
+    inset: 0;
+}
+
+.profile-company-upload-overlay {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 30px;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: 0.2s;
+}
+
+.profile-company-avatar-wrapper:hover .profile-company-upload-overlay {
+    opacity: 1;
+}
+
+.profile-company-upload-overlay span {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.profile-company-name {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 5px 0;
+    text-align: center;
+}
+
+/* WEBSITE */
+.profile-company-website {
+    font-size: 13px;
+    background: #e8f7f0;
+    color: #00b14f;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-decoration: none;
+    display: inline-block;
+    word-break: break-all;
+}
+
+.profile-company-website:hover {
+    background: #00b14f;
+    color: #fff;
+}
+
+.profile-company-website.empty {
+    opacity: 0.6;
+}
+
+/* INFO LIST */
+.profile-company-info-list {
+    width: 100%;
+    text-align: left;
+}
+
+.profile-company-info-item {
+    background: #fff;
+    border: 1px solid #e6f1ec;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ===== CONTENT ===== */
+.profile-company-content {
+    flex: 1;
+    padding: 40px 50px;
+}
+
+.profile-company-title {
+    border-left: 5px solid #00b14f;
+    padding-left: 15px;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 30px;
+}
+
+/* ===== FORM ===== */
+.profile-company-form-group {
+    margin-bottom: 20px;
+}
+
+.profile-company-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.profile-company-input,
+.profile-company-select,
+.profile-company-textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.profile-company-input:focus,
+.profile-company-select:focus,
+.profile-company-textarea:focus {
+    border-color: #00b14f;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0,177,79,0.15);
+}
+
+.profile-company-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.profile-company-textarea {
+    resize: vertical;
+    line-height: 1.6;
+}
+
+/* ===== BUTTON ===== */
+.profile-company-btn-save {
+    background-color: #00b14f;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    float: right;
+}
+
+.profile-company-btn-save:hover {
+    background-color: #009643;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .profile-company-card {
+        flex-direction: column;
+    }
+
+    .profile-company-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+    }
+
+    .profile-company-content {
+        padding: 30px 20px;
+    }
+
+    .profile-company-form-grid {
+        grid-template-columns: 1fr;
+    }
+}

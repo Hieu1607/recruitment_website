@@ -1,272 +1,211 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* --- 1. CẤU TRÚC CHUNG --- */
+/* --- CẤU TRÚC CHUNG --- */
 .company-page {
-    background-color: #f0f4f8; /* Nền sáng, hiện đại hơn */
+    background-color: #f8fbf9;
     min-height: 100vh;
-    padding: 60px 20px;
+    padding: 100px 20px 60px; /* Padding top 100px để né Header */
     font-family: 'Inter', sans-serif;
-    color: #1e293b;
+    color: #333;
 }
 
 .company-container {
-    max-width: 1100px; /* Thu hẹp lại một chút để card trông gọn gàng */
+    max-width: 1100px;
     margin: 0 auto;
 }
 
-/* --- 2. HEADER --- */
 .page-header {
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 40px;
 }
 
 .page-header h1 {
-    font-size: 36px;
-    color: #0f172a;
-    margin-bottom: 12px;
+    font-size: 32px;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    color: #0f172a;
+    margin-bottom: 10px;
 }
 
 .page-header p {
     color: #64748b;
-    font-size: 17px;
-    max-width: 600px;
-    margin: 0 auto;
-    line-height: 1.6;
+    font-size: 16px;
 }
 
-/* --- 3. GRID SYSTEM (CHỈNH SỬA QUAN TRỌNG) --- */
+/* --- GRID SYSTEM --- */
 .company-grid {
     display: grid;
-    /* Desktop: Cố định 2 cột (1 hàng 2 công ty) */
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 30px; /* Khoảng cách giữa các card rộng thoáng hơn */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
 }
 
-/* --- 4. COMPANY CARD (LÀM ĐẸP) --- */
-.company-card {
+/* --- CARD ITEM --- */
+.company-list-item { 
     background: white;
-    border-radius: 20px; /* Bo tròn mạnh hơn */
-    padding: 28px;
+    border-radius: 16px;
+    padding: 20px;
     display: flex;
     flex-direction: row;
-    align-items: flex-start; /* Căn logo lên trên cùng */
-    gap: 24px;
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    
-    /* Đổ bóng nhẹ nhàng, tinh tế */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 
-                0 2px 4px -1px rgba(0, 0, 0, 0.02);
-    
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+    align-items: flex-start;
+    gap: 18px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+    height: auto; 
+    min-height: 0;
 }
 
-/* Hiệu ứng Hover card */
-.company-card:hover {
-    transform: translateY(-6px); /* Bay lên nhẹ */
-    border-color: #cbd5e1;
-    /* Đổ bóng đậm hơn khi hover */
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 
-                0 10px 10px -5px rgba(0, 0, 0, 0.01);
+.company-list-item:hover {
+    transform: translateY(-4px);
+    border-color: #00b14f; 
+    box-shadow: 0 10px 25px -5px rgba(0, 177, 79, 0.15);
 }
 
-/* --- 5. LOGO --- */
-.company-logo-wrapper {
+/* Logo Wrapper */
+.list-logo-wrapper {
     flex-shrink: 0;
-    width: 90px;
+    width: 90px;  /* Tăng nhẹ kích thước cho đẹp */
     height: 90px;
-    border-radius: 16px;
-    padding: 10px;
-    background: #ffffff;
+    border-radius: 12px;
+    padding: 5px;
+    background: #fff;
     border: 1px solid #f1f5f9;
-    
-    /* Căn giữa ảnh */
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
 }
 
-.company-logo {
-    max-width: 100%;
-    max-height: 100%;
+.list-logo-img {
+    width: 100%;
+    height: 100%;
     object-fit: contain;
 }
 
-/* --- 6. NỘI DUNG CARD --- */
+/* Info Column */
 .company-info {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 0;
+    min-width: 0; /* Quan trọng để text truncate hoạt động */
 }
 
 .company-name {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: #0f172a;
-    margin: 0 0 12px 0;
-    line-height: 1.3;
-    transition: color 0.2s;
+    margin: 0 0 8px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.company-card:hover .company-name {
-    color: #2563eb; /* Đổi màu tên khi hover vào card */
+.company-list-item:hover .company-name {
+    color: #00b14f;
 }
 
-/* Tags (Loại hình, Quy mô) */
+/* Tags */
 .company-meta {
     display: flex;
-    gap: 10px;
+    gap: 8px;
+    margin-bottom: 12px;
     flex-wrap: wrap;
-    margin-bottom: 16px;
 }
 
-.meta-tag {
-    font-size: 12px;
-    padding: 6px 12px;
-    border-radius: 30px; /* Bo tròn viên thuốc */
-    font-weight: 600;
-    display: flex;
+.meta-badge {
+    display: inline-flex;
     align-items: center;
-    gap: 6px; /* Khoảng cách giữa icon và chữ */
-}
-
-.type-tag {
-    background-color: #eff6ff;
-    color: #3b82f6;
-    border: 1px solid #dbeafe;
-}
-
-.size-tag {
-    background-color: #f8fafc;
-    color: #64748b;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+    background-color: #f1f5f9;
+    color: #475569;
     border: 1px solid #e2e8f0;
 }
 
-/* Mô tả */
-.company-desc {
-    font-size: 14px;
-    color: #64748b;
-    margin: 0;
-    line-height: 1.6;
+/* NÚT CHI TIẾT (ĐÃ SỬA: SANG PHẢI) */
+.btn-view-detail {
+    margin-top: auto;      /* Đẩy nút xuống đáy nếu nội dung trên ngắn */
+    align-self: flex-end;  /* QUAN TRỌNG: Đẩy nút sang bên PHẢI */
     
-    /* Cắt dòng thông minh sau 2 dòng */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin-bottom: 20px; /* Tạo khoảng cách với nút bấm */
-}
-
-/* --- 7. BUTTON CHI TIẾT --- */
-.company-footer {
-    margin-top: auto;
-    /* Nếu muốn nút nằm ngang hàng với description thì xóa margin-top */
-}
-
-.btn-detail {
-    background-color: #ffffff;
-    color: #0f172a;
+    padding: 8px 20px;
     border: 1px solid #e2e8f0;
-    padding: 10px 20px;
-    border-radius: 10px;
+    background: #fff;
+    color: #333;
     font-size: 13px;
     font-weight: 600;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
-    display: inline-block;
 }
 
-/* Hover vào nút thì nút chuyển màu xanh */
-.btn-detail:hover {
-    background-color: #2563eb;
+.company-list-item:hover .btn-view-detail {
+    background: #00b14f;
     color: white;
-    border-color: #2563eb;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    border-color: #00b14f;
+    box-shadow: 0 4px 10px rgba(0, 177, 79, 0.2);
 }
 
-/* --- 8. PHÂN TRANG (PAGINATION) --- */
+/* --- PAGINATION --- */
 .pagination-controls {
     display: flex;
     justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 60px;
+    gap: 6px;
+    margin-top: 50px;
 }
 
-.btn-page {
-    width: 44px;
-    height: 44px;
-    border: none;
-    background-color: white;
-    border-radius: 12px; /* Nút vuông bo góc */
+.btn-pagi {
+    width: 40px; height: 40px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 8px;
     color: #64748b;
     font-weight: 600;
-    font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: 0.2s;
 }
 
-.btn-page:hover:not(:disabled) {
-    background-color: #eff6ff;
-    color: #2563eb;
-    transform: translateY(-2px);
+.btn-pagi:hover:not(:disabled) {
+    border-color: #00b14f;
+    color: #00b14f;
+    background-color: #f0fdf4;
 }
 
-.btn-page.active {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    color: white;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+.btn-pagi.active {
+    background: #00b14f; 
+    color: white; 
+    border-color: #00b14f;
+    box-shadow: 0 4px 6px rgba(0, 177, 79, 0.2);
 }
 
-.btn-page:disabled {
-    background-color: #f1f5f9;
+.btn-pagi:disabled {
+    background-color: #f8fafc;
     color: #cbd5e1;
     cursor: not-allowed;
-    box-shadow: none;
 }
 
-/* --- 9. RESPONSIVE (MOBILE & TABLET) --- */
-@media (max-width: 900px) {
-    .company-grid {
-        grid-template-columns: 1fr; /* Chuyển về 1 cột trên iPad/Mobile */
-    }
-}
-
-@media (max-width: 600px) {
-    .company-page {
-        padding: 30px 15px;
-    }
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 768px) {
+    .company-grid { grid-template-columns: 1fr; }
     
-    .company-card {
+    .company-list-item {
         flex-direction: column; /* Logo lên trên, chữ xuống dưới */
-        align-items: flex-start;
-        padding: 20px;
-    }
-
-    .company-logo-wrapper {
-        width: 70px;
-        height: 70px;
-        margin-bottom: 10px;
-    }
-
-    .btn-detail {
-        width: 100%; /* Nút full chiều rộng trên mobile */
+        align-items: center;
         text-align: center;
     }
-}
-
-/* --- LOADING --- */
-.loading-container, .no-data {
-    text-align: center;
-    padding: 60px 20px;
-    color: #94a3b8;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    
+    .company-info {
+        width: 100%;
+        align-items: center; /* Căn giữa nội dung */
+    }
+    
+    .btn-view-detail {
+        align-self: center; /* Trên mobile thì căn giữa cho đẹp */
+        width: 100%;
+        margin-top: 15px;
+    }
+    
+    .company-meta {
+        justify-content: center;
+    }
 }

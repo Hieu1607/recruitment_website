@@ -1,0 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* --- LAYOUT CHUNG --- */
+.manage-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 20px 60px; /* Padding top lớn để né Header fixed */
+    font-family: 'Inter', sans-serif;
+    color: #333;
+    min-height: 100vh;
+    background-color: #f8fbf9;
+}
+
+/* --- HEADER TRANG --- */
+.manage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.manage-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+/* Nút Tạo mới (+ Đăng tin) */
+.btn-create {
+    background-color: #00b14f;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0, 177, 79, 0.2);
+}
+
+.btn-create:hover {
+    background-color: #009643;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 177, 79, 0.3);
+}
+
+/* Nút Quay lại */
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 20px;
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.btn-back:hover {
+    color: #00b14f;
+    border-color: #00b14f;
+    background: white;
+}
+
+/* --- BẢNG DỮ LIỆU (TABLE) --- */
+.table-wrapper {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow-x: auto; /* Cho phép cuộn ngang trên mobile */
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 800px; /* Đảm bảo bảng không bị co quá nhỏ */
+}
+
+.custom-table th {
+    background: #f8fafc;
+    padding: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.custom-table td {
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+    vertical-align: middle;
+    color: #333;
+}
+
+.custom-table tr:last-child td {
+    border-bottom: none;
+}
+
+.custom-table tr:hover {
+    background-color: #f9fcfb; /* Hover màu xanh rất nhạt */
+}
+
+/* --- TRẠNG THÁI (BADGE) --- */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+/* Màu sắc trạng thái */
+.status-pending { 
+    background: #fff7ed; 
+    color: #c2410c; 
+    border: 1px solid #ffedd5; 
+}
+
+.status-accepted, .status-approved { 
+    background: #f0fdf4; 
+    color: #15803d; 
+    border: 1px solid #dcfce7; 
+}
+
+.status-rejected { 
+    background: #fef2f2; 
+    color: #b91c1c; 
+    border: 1px solid #fee2e2; 
+}
+
+/* --- CÁC NÚT THAO TÁC TRONG BẢNG --- */
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+    margin-right: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Nút Xem chi tiết */
+.btn-view {
+    background: #e6f7ef;
+    color: #00b14f;
+    border: 1px solid transparent;
+}
+.btn-view:hover {
+    background: #00b14f;
+    color: white;
+}
+
+/* Nút Duyệt (✓) */
+.btn-approve {
+    background: #dcfce7;
+    color: #166534;
+    width: 32px; height: 32px; padding: 0; /* Hình vuông */
+}
+.btn-approve:hover {
+    background: #166534;
+    color: white;
+}
+
+/* Nút Từ chối (✕) */
+.btn-reject {
+    background: #fee2e2;
+    color: #991b1b;
+    width: 32px; height: 32px; padding: 0;
+}
+.btn-reject:hover {
+    background: #991b1b;
+    color: white;
+}
+
+/* Trạng thái trống */
+.empty-state {
+    padding: 60px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 15px;
+}
