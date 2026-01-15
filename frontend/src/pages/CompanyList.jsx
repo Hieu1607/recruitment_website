@@ -1,42 +1,61 @@
-// src/pages/CompanyList.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // [MỚI] 1. Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import companyService from '../services/companyService';
 import '../css/CompanyList.css'; 
 
 const BASE_API_URL = 'http://localhost:5000'; 
 
 const CompanyList = () => {
-    const navigate = useNavigate(); // [MỚI] 2. Khai báo hook chuyển trang
+    const navigate = useNavigate();
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(true);
+    
+    // State phân trang
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const LIMIT = 10; 
 
+    // [MỚI] State tìm kiếm
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState(''); // (Tùy chọn) Dùng để kích hoạt useEffect
+
+    // Fetch khi page hoặc từ khóa tìm kiếm thay đổi (đã bấm enter/nút tìm)
     useEffect(() => {
         fetchCompanies(page);
-    }, [page]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page, debouncedSearch]);
 
     const fetchCompanies = async (pageNumber) => {
         setLoading(true);
         try {
-            const response = await companyService.getAllCompanies(pageNumber, LIMIT);
-            if (response && response.data) {
-                const list = response.data.companies || response.data || [];
-                setCompanies(list);
-                if (response.pagination) {
-                    setTotalPages(response.pagination.totalPages || 1);
-                } else if (response.totalPages) {
-                    setTotalPages(response.totalPages);
-                }
-            } else {
-                setCompanies([]);
+            // [CẬP NHẬT] Truyền thêm debouncedSearch vào service
+            const { data, pagination } = await companyService.getAllCompanies(pageNumber, LIMIT, debouncedSearch);
+            
+            setCompanies(Array.isArray(data) ? data : []);
+
+            if (pagination && pagination.totalPages) {
+                setTotalPages(pagination.totalPages);
+            } else if (pagination && pagination.total) {
+                setTotalPages(Math.ceil(pagination.total / LIMIT));
             }
         } catch (error) {
             console.error("Lỗi:", error);
+            setCompanies([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // [MỚI] Xử lý khi bấm tìm kiếm
+    const handleSearch = () => {
+        setPage(1); // Reset về trang 1 khi tìm kiếm mới
+        setDebouncedSearch(searchTerm); // Kích hoạt useEffect
+    };
+
+    // [MỚI] Xử lý khi bấm Enter
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
         }
     };
 
@@ -55,24 +74,38 @@ const CompanyList = () => {
         }
     };
 
-    if (loading) return <div className="company-page" style={{textAlign:'center', paddingTop:'100px'}}>Đang tải...</div>;
-
     return (
         <div className="company-page">
             <div className="company-container">
                 <div className="page-header">
                     <h1>Nhà tuyển dụng hàng đầu</h1>
                     <p>Khám phá {companies.length}+ cơ hội nghề nghiệp từ các công ty uy tín</p>
+                    
+                    {/* [MỚI] Ô TÌM KIẾM */}
+                    <div className="company-search-wrapper">
+                        <input 
+                            type="text" 
+                            className="company-search-input"
+                            placeholder="Nhập tên công ty..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                        />
+                        <button className="btn-search-company" onClick={handleSearch}>
+                            🔍 Tìm kiếm
+                        </button>
+                    </div>
                 </div>
 
-                {companies.length === 0 ? (
-                    <div style={{textAlign:'center', padding:'40px'}}>Chưa có công ty nào.</div>
+                {loading ? (
+                    <div style={{textAlign:'center', padding:'40px'}}>Đang tải dữ liệu...</div>
+                ) : companies.length === 0 ? (
+                    <div style={{textAlign:'center', padding:'40px'}}>Không tìm thấy công ty nào phù hợp.</div>
                 ) : (
                     <>
                         <div className="company-grid">
                             {companies.map((comp) => (
                                 <div key={comp.id} className="company-list-item">
-                                    
                                     {/* LOGO */}
                                     <div className="list-logo-wrapper">
                                         <img 
@@ -88,27 +121,17 @@ const CompanyList = () => {
                                         <h3 className="company-name">{comp.name}</h3>
                                         
                                         <div className="company-meta">
-                                            {/* Loại hình công ty */}
                                             {comp.type && (
                                                 <span className="meta-badge" style={{background:'#e6f7ef', color:'#00b14f', border:'1px solid #d1fae5'}}>
                                                     🏢 {comp.type}
                                                 </span>
                                             )}
-                                            
-                                            {/* Quy mô */}
-                                            <span className="meta-badge">
-                                                👥 {comp.size || 'N/A'}
-                                            </span>
-
-                                            {/* Địa chỉ */}
+                                            <span className="meta-badge">👥 {comp.size || 'N/A'}</span>
                                             {comp.address && (
-                                                <span className="meta-badge">
-                                                    📍 {comp.address.split(',')[0]}
-                                                </span>
+                                                <span className="meta-badge">📍 {comp.address.split(',')[0]}</span>
                                             )}
                                         </div>
 
-                                        {/* Mô tả ngắn */}
                                         <p className="company-desc" style={{
                                             fontSize:'13px', color:'#666', lineHeight:'1.5',
                                             margin:'10px 0',
@@ -120,7 +143,6 @@ const CompanyList = () => {
                                             {comp.description || 'Chưa có mô tả giới thiệu về công ty này.'}
                                         </p>
 
-                                        {/* [MỚI] 3. Thêm sự kiện onClick để chuyển trang */}
                                         <button 
                                             className="btn-view-detail"
                                             onClick={() => navigate(`/companies/${comp.id}`)}

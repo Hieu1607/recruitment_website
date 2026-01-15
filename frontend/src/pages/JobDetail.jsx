@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import jobService from '../services/jobService';
-// 1. Import service lấy profile
 import { getMyProfile } from '../services/profileService'; 
 import '../css/JobDetail.css';
 
@@ -20,7 +19,6 @@ const JobDetail = () => {
   const [coverLetter, setCoverLetter] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 2. Thêm state để chứa danh sách CV lấy từ API
   const [cvList, setCvList] = useState([]); 
   const [loadingProfile, setLoadingProfile] = useState(false);
 
@@ -39,9 +37,8 @@ const JobDetail = () => {
     fetchJob();
   }, [id]);
 
-  /* ================= APPLY CLICK (SỬA LẠI ĐOẠN NÀY) ================= */
+  /* ================= APPLY CLICK (ĐÃ SỬA AN TOÀN HƠN) ================= */
   const handleApplyClick = async () => {
-    // 1. Kiểm tra đăng nhập
     if (!user) {
       if (window.confirm('Bạn cần đăng nhập để ứng tuyển. Đăng nhập ngay?')) {
         navigate('/login');
@@ -49,23 +46,26 @@ const JobDetail = () => {
       return;
     }
 
-    // 2. Hiển thị modal và bật loading
     setShowModal(true);
     setLoadingProfile(true);
 
     try {
-      // 3. Gọi API lấy Profile mới nhất để có danh sách CV
       const profileData = await getMyProfile();
       
-      // Kiểm tra xem có CV không
-      if (profileData && profileData.cv_url && Array.isArray(profileData.cv_url)) {
-        setCvList(profileData.cv_url);
-        // Tự động chọn CV đầu tiên nếu có
-        if (profileData.cv_url.length > 0) {
-            setSelectedCV(profileData.cv_url[0]);
-        }
-      } else {
-        setCvList([]);
+      // SỬA: Logic kiểm tra CV an toàn để không bị lỗi
+      let rawCV = profileData?.cv_url;
+      let safeCVList = [];
+
+      if (Array.isArray(rawCV)) {
+        safeCVList = rawCV;
+      } else if (typeof rawCV === 'string' && rawCV.trim() !== '') {
+        safeCVList = [rawCV]; // Nếu là string thì nhét vào mảng
+      }
+
+      setCvList(safeCVList);
+
+      if (safeCVList.length > 0) {
+        setSelectedCV(safeCVList[0]);
       }
     } catch (error) {
       console.error("Lỗi lấy thông tin Profile:", error);
@@ -86,7 +86,6 @@ const JobDetail = () => {
 
     setIsSubmitting(true);
     try {
-      // Logic ứng tuyển (có thể cần truyền thêm coverLetter nếu API hỗ trợ)
       await jobService.applyJob(job.id, { cvUrl: selectedCV, coverLetter }); 
       
       alert('✅ Ứng tuyển thành công!');
@@ -113,10 +112,16 @@ const JobDetail = () => {
       <div className="job-detail-container">
         {/* ================= HEADER ================= */}
         <div className="job-header-card">
-          <h1 className="job-title-large">{job.title}</h1>
-          <p className="company-name-large">
-            🏢 {job.companyName || 'Công ty ẩn danh'}
-          </p>
+          <div style={{display: 'flex', justifyContent: 'space-between'}}>
+             <div>
+                <h1 className="job-title-large">{job.title}</h1>
+                <p className="company-name-large">
+                  🏢 {job.companyName || 'Công ty ẩn danh'}
+                </p>
+             </div>
+             {/* Thêm hiển thị logo nếu có */}
+             {job.companyLogo && <img src={job.companyLogo} alt="Logo" style={{height: 60, maxWidth: 100}} />}
+          </div>
 
           <div className="job-meta-row">
             <span className="meta-tag salary-tag">💰 {job.salary}</span>
@@ -188,7 +193,6 @@ const JobDetail = () => {
               <div className="form-group">
                 <label>Chọn CV từ hồ sơ *</label>
 
-                {/* Kiểm tra trạng thái loading profile */}
                 {loadingProfile ? (
                     <p>⏳ Đang tải danh sách CV...</p>
                 ) : (
@@ -196,9 +200,7 @@ const JobDetail = () => {
                         {cvList.length > 0 ? (
                         <div className="cv-list">
                             {cvList.map((cv, index) => {
-                            // Logic lấy tên file đẹp hơn
-                            const cvName = cv.split('/').pop().replace(/^\d+_/, ''); // Bỏ timestamp đầu file nếu có
-
+                            const cvName = cv.split('/').pop().replace(/^\d+_/, '');
                             return (
                                 <label key={index} className="cv-item" style={{display: 'flex', gap: '10px', padding: '5px 0', cursor: 'pointer'}}>
                                 <input
@@ -245,7 +247,6 @@ const JobDetail = () => {
                 <button
                   type="submit"
                   className="btn-primary"
-                  // Disable nút gửi nếu đang gửi HOẶC không có CV
                   disabled={isSubmitting || cvList.length === 0}
                 >
                   {isSubmitting ? 'Đang gửi...' : 'Gửi hồ sơ'}

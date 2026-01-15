@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import companyService from '../services/companyService';
-import jobService from '../services/jobService';
-// Import file CSS bạn đã cung cấp
+import jobService from '../services/jobService'; // Đảm bảo bạn có file này hoặc comment lại nếu chưa có
 import '../css/CompanyDetail.css';
 
 const BASE_API_URL = 'http://localhost:5000';
@@ -23,10 +22,15 @@ const CompanyDetail = () => {
                 const compData = await companyService.getCompanyById(id);
                 setCompany(compData);
 
-                // 2. Lấy danh sách việc làm của công ty
+                // 2. Lấy danh sách việc làm của công ty (Chỉ chạy nếu lấy được công ty)
                 if (compData) {
-                    const jobsData = await jobService.getJobsByCompanyId(id);
-                    setJobs(jobsData || []);
+                    try {
+                        const jobsData = await jobService.getJobsByCompanyId(id);
+                        setJobs(jobsData || []);
+                    } catch (err) {
+                        console.warn("Chưa lấy được danh sách job:", err);
+                        setJobs([]); // Không crash nếu lỗi lấy job
+                    }
                 }
             } catch (error) {
                 console.error("Lỗi tải dữ liệu chi tiết:", error);
@@ -43,30 +47,27 @@ const CompanyDetail = () => {
         if (!comp) return "";
         
         // Link tạo avatar mặc định nếu không có logo
-        const autoAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(comp.name)}&background=random&color=fff&size=200&font-size=0.5`;
+        const autoAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(comp.name || 'C')}&background=random&color=fff&size=200&font-size=0.5`;
 
+        // [FIX] JSON của bạn dùng 'logo_company_url'
         const logoData = comp.logo_company_url || comp.logo || comp.image;
 
-        // Nếu không có dữ liệu logo -> Trả về Avatar tự tạo
         if (!logoData) return autoAvatar;
         
-        // Nếu là link online (http/https) -> Trả về nguyên gốc
         if (typeof logoData === 'string' && logoData.startsWith('http')) return logoData;
 
-        // Nếu là đường dẫn file nội bộ -> Ghép với Base URL
         const cleanPath = logoData.startsWith('/') ? logoData.substring(1) : logoData;
         return `${BASE_API_URL}/${cleanPath}`;
     };
 
-    if (loading) return <div className="loading-spinner">Đang tải thông tin...</div>;
-    if (!company) return <div className="not-found">Không tìm thấy công ty này.</div>;
+    if (loading) return <div className="loading-spinner" style={{textAlign:'center', marginTop:'100px'}}>Đang tải thông tin...</div>;
+    if (!company) return <div className="not-found" style={{textAlign:'center', marginTop:'100px'}}>Không tìm thấy công ty này.</div>;
 
     // Link dự phòng cho onError
-    const fallbackLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=random&color=fff&size=200&font-size=0.5`;
+    const fallbackLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=random&color=fff&size=200`;
 
     return (
         <div className="company-detail-page">
-            {/* Thêm style inline này để đẩy nội dung xuống khỏi Header cố định (nếu có) */}
             <div style={{ paddingTop: '80px' }}></div>
 
             {/* --- PHẦN HEADER THÔNG TIN --- */}

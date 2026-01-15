@@ -210,8 +210,8 @@ const CompanyProfile = () => {
                                             setCompany({
                                                 ...company,
                                                 type: e.target.value
-                                        })
-                                    }
+                                            })
+                                        }
                                     />
                                 </div>
                             </div>
@@ -251,6 +251,23 @@ const CompanyProfile = () => {
                                     />
                                 </div>
                             </div>
+
+                            {/* --- ĐÃ THÊM PHẦN NHẬP ĐỊA CHỈ TẠI ĐÂY --- */}
+                            <div className="profile-company-form-group">
+                                <label>Địa chỉ</label>
+                                <input
+                                    className="profile-company-input"
+                                    value={company.address}
+                                    placeholder="Nhập địa chỉ công ty..."
+                                    onChange={(e) =>
+                                        setCompany({
+                                            ...company,
+                                            address: e.target.value
+                                        })
+                                    }
+                                />
+                            </div>
+                            {/* ----------------------------------------- */}
 
                             <div className="profile-company-form-group">
                                 <label>Giới thiệu công ty</label>

@@ -209,3 +209,43 @@
         justify-content: center;
     }
 }
+
+.company-search-wrapper {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.company-search-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.company-search-input:focus {
+  border-color: #00b14f;
+  box-shadow: 0 0 0 3px rgba(0, 177, 79, 0.1);
+}
+
+.btn-search-company {
+  background-color: #00b14f;
+  color: white;
+  border: none;
+  padding: 0 25px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-search-company:hover {
+  background-color: #009643;
+}
