@@ -34,4 +34,21 @@ docker compose exec backend npx sequelize-cli db:seed:all
 ```bash
 docker compose down
 ```
-Add `-v` if you want to drop the Postgres volume: `docker compose down -v`.
+
+
+One-time setup
+# From repo root
+npm install
+
+# Manually add required libs (if not in package.json)
+npm install react-router-dom react-icons groq-sdk
+# Note: Grok chatbot integration usually requires an API client (e.g., axios or specific SDK)
+npm install axios
+
+This ensures react-router-dom (routing), react-icons (UI icons), and necessary packages for the Grok chatbot are ready.
+
+Run application
+Bash
+
+# From repo root
+npm start
