@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import jobService from '../../services/jobService';
-import { getMyCompany } from '../../services/profileService'; // Import hàm lấy công ty
+import { getMyCompany } from '../../services/profileService';
 import '../../css/postJob.css';
 
 const PostJob = () => {
@@ -82,7 +82,7 @@ const PostJob = () => {
             await jobService.createJob(payload);
             
             alert("🎉 Đăng tin tuyển dụng thành công!");
-            navigate('/employer/manage-jobs'); // Chuyển hướng về trang quản lý tin (nếu có) hoặc về Home
+            navigate('/employer/jobs'); // Chuyển hướng về trang quản lý tin (nếu có) hoặc về Home
         } catch (error) {
             console.error(error);
             const errorMsg = error.response?.data?.errors 
